@@ -1,0 +1,76 @@
+/* Design Tokens & Theme Variables */
+:root {
+  /* Warm Light Theme (Default) */
+  --bg-primary: #FAF9F6;
+  --bg-surface: #FFFFFF;
+  --bg-surface-elevated: #F3F1EC;
+  --bg-input: #FFFFFF;
+  --bg-hover: #F2EFE9;
+  --bg-tag: #F0EDE6;
+  
+  --text-primary: #171717;
+  --text-secondary: #666666;
+  --text-muted: #8E8E93;
+  --text-inverse: #FFFFFF;
+  
+  --border-light: #E7E5E4;
+  --border-subtle: #F0EDE8;
+  --border-focus: #171717;
+
+  --accent-primary: #171717;
+  --accent-secondary: #262626;
+  --accent-highlight: #DC2626;
+  --accent-badge-bg: #EEF2F6;
+  --accent-badge-text: #1E293B;
+
+  --code-bg: #111827;
+  --code-header-bg: #1F2937;
+  --code-text: #E5E7EB;
+  --code-border: #374151;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.08);
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.25s ease;
+}
+
+[data-theme="dark"] {
+  /* Sophisticated Dark Theme */
+  --bg-primary: #0E1010;
+  --bg-surface: #17191D;
+  --bg-surface-elevated: #1F2228;
+  --bg-input: #1C1F24;
+  --bg-hover: #252830;
+  --bg-tag: #23272F;
+
+  --text-primary: #F3F4F6;
+  --text-secondary: #A1A1AA;
+  --text-muted: #71717A;
+  --text-inverse: #0E1010;
+
+  --border-light: #2A2D35;
+  --border-subtle: #20232A;
+  --border-focus: #F3F4F6;
+
+  --accent-primary: #F3F4F6;
+  --accent-secondary: #E5E7EB;
+  --accent-highlight: #EF4444;
+  --accent-badge-bg: #262A35;
+  --accent-badge-text: #93C5FD;
+
+  --code-bg: #0B0E14;
+  --code-header-bg: #141821;
+  --code-text: #F3F4F6;
+  --code-border: #232936;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.6);
+}

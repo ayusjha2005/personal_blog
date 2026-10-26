@@ -1,0 +1,55 @@
+<% if (totalPages > 1) { %>
+  <nav class="pagination-container" aria-label="Pagination Navigation">
+    <% 
+      function buildPageUrl(p) {
+        const params = [];
+        if (currentCategory && currentCategory !== 'all') params.push('category=' + encodeURIComponent(currentCategory));
+        if (searchQuery) params.push('q=' + encodeURIComponent(searchQuery));
+        if (sortOrder && sortOrder !== 'newest') params.push('sort=' + encodeURIComponent(sortOrder));
+        params.push('page=' + p);
+        return '/blog?' + params.join('&');
+      }
+    %>
+
+    <!-- Previous Page Button -->
+    <% if (currentPage > 1) { %>
+      <a href="<%= buildPageUrl(currentPage - 1) %>" class="page-btn" aria-label="Previous Page">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </a>
+    <% } else { %>
+      <span class="page-btn disabled" aria-disabled="true">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </span>
+    <% } %>
+
+    <!-- Page Numbers -->
+    <% for (let i = 1; i <= totalPages; i++) { %>
+      <% if (i === currentPage) { %>
+        <span class="page-btn active" aria-current="page"><%= i %></span>
+      <% } else if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) { %>
+        <a href="<%= buildPageUrl(i) %>" class="page-btn"><%= i %></a>
+      <% } else if (i === currentPage - 2 || i === currentPage + 2) { %>
+        <span class="page-btn disabled">...</span>
+      <% } %>
+    <% } %>
+
+    <!-- Next Page Button -->
+    <% if (currentPage < totalPages) { %>
+      <a href="<%= buildPageUrl(currentPage + 1) %>" class="page-btn" aria-label="Next Page">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </a>
+    <% } else { %>
+      <span class="page-btn disabled" aria-disabled="true">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </span>
+    <% } %>
+  </nav>
+<% } %>

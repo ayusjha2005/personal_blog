@@ -1,0 +1,30 @@
+<%- include('../partials/head') %>
+<body>
+  <%- include('../partials/navbar') %>
+
+  <main class="site-main" style="display: flex; align-items: center; justify-content: center; padding: 6rem 1.5rem;">
+    <div style="text-align: center; max-width: 500px;">
+      <div style="font-size: 5rem; font-weight: 800; color: var(--accent-highlight); line-height: 1; margin-bottom: 1rem;">500</div>
+      <h1 style="font-size: 1.75rem; font-weight: 700; margin-bottom: 1rem;">Server Error</h1>
+      <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+        <%= typeof message !== 'undefined' ? message : 'Something went wrong on our end. Please try again later.' %>
+      </p>
+      <% if (typeof error !== 'undefined' && error) { %>
+        <pre style="text-align: left; background: var(--bg-surface-elevated); padding: 1rem; border-radius: var(--radius-md); font-size: 0.8rem; overflow-x: auto; margin-bottom: 1.5rem;"><%= error %></pre>
+      <% } %>
+      <a href="/" class="btn-pill-primary">
+        <span>Back to Home</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+          <polyline points="12 5 19 12 12 19"></polyline>
+        </svg>
+      </a>
+    </div>
+  </main>
+
+  <%- include('../partials/footer') %>
+
+  <script src="/js/theme.js"></script>
+  <script src="/js/main.js"></script>
+</body>
+</html>

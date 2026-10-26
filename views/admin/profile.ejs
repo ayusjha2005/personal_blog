@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  
+  <script>
+    (function() {
+      try {
+        var saved = localStorage.getItem('theme');
+        var theme = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {}
+    })();
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="/css/themes.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="admin-layout">
+  <%- include('sidebar') %>
+
+  <div class="admin-main">
+    <header class="admin-topbar">
+      <h1 style="font-size: 1.25rem; font-weight: 700;">Site &amp; Profile Settings</h1>
+      <button type="submit" form="profile-form" class="btn-pill-primary">
+        Save Settings
+      </button>
+    </header>
+
+    <main class="admin-content">
+      <% if (typeof success !== 'undefined' && success) { %>
+        <div class="alert alert-success" role="alert"><%= success %></div>
+      <% } %>
+
+      <% if (typeof error !== 'undefined' && error) { %>
+        <div class="alert alert-error" role="alert"><%= error %></div>
+      <% } %>
+
+      <form id="profile-form" action="/admin/profile" method="POST">
+        <!-- Identity & Hero -->
+        <div class="data-card" style="padding: 2rem;">
+          <h2 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-light);">
+            Identity &amp; Hero Section
+          </h2>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="name" class="form-label">Display Name</label>
+              <input type="text" id="name" name="name" class="form-input" value="<%= profile.name || 'Ayush Jha' %>" required>
+            </div>
+
+            <div class="form-group">
+              <label for="heroHeadline" class="form-label">Hero Headline</label>
+              <input type="text" id="heroHeadline" name="heroHeadline" class="form-input" value="<%= profile.heroHeadline || 'Ideas. Code. Progress.' %>" required>
+            </div>
+
+            <div class="form-group form-full">
+              <label for="tagline" class="form-label">Personal Tagline</label>
+              <input type="text" id="tagline" name="tagline" class="form-input" value="<%= profile.tagline || 'Learning in public, building in private.' %>" required>
+            </div>
+
+            <div class="form-group form-full">
+              <label for="bio" class="form-label">Short Biography (Hero &amp; About intro)</label>
+              <textarea id="bio" name="bio" class="form-textarea" style="min-height: 80px;" required><%= profile.bio || '' %></textarea>
+            </div>
+
+            <div class="form-group form-full">
+              <label for="extendedBio" class="form-label">Extended Biography (About page)</label>
+              <textarea id="extendedBio" name="extendedBio" class="form-textarea" style="min-height: 80px;" required><%= profile.extendedBio || '' %></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Handwritten Quotes & Visuals -->
+        <div class="data-card" style="padding: 2rem;">
+          <h2 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-light);">
+            Handwritten Cursive Quotes &amp; Images
+          </h2>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="heroScriptQuote" class="form-label">Hero Cursive Phrase</label>
+              <input type="text" id="heroScriptQuote" name="heroScriptQuote" class="form-input" value="<%= profile.heroScriptQuote || 'Better Code, Brighter Days' %>">
+            </div>
+
+            <div class="form-group">
+              <label for="aboutScriptQuote" class="form-label">About Page Cursive Phrase</label>
+              <input type="text" id="aboutScriptQuote" name="aboutScriptQuote" class="form-input" value="<%= profile.aboutScriptQuote || 'Just a guy who loves building things.' %>">
+            </div>
+
+            <div class="form-group">
+              <label for="contactScriptQuote" class="form-label">Contact Card Cursive Phrase</label>
+              <input type="text" id="contactScriptQuote" name="contactScriptQuote" class="form-input" value="<%= profile.contactScriptQuote || "Let's Build Something Amazing." %>">
+            </div>
+
+            <div class="form-group">
+              <label for="profileImage" class="form-label">Profile Image Path</label>
+              <input type="text" id="profileImage" name="profileImage" class="form-input" value="<%= profile.profileImage || '/images/profile.jpg' %>">
+            </div>
+          </div>
+        </div>
+
+        <!-- Badges & Contact Info -->
+        <div class="data-card" style="padding: 2rem;">
+          <h2 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-light);">
+            About Badges &amp; Contact Info
+          </h2>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="degree" class="form-label">Education / Degree</label>
+              <input type="text" id="degree" name="degree" class="form-input" value="<%= profile.degree || 'B.Tech CSE (CSBS) @ VIT-AP' %>">
+            </div>
+
+            <div class="form-group">
+              <label for="location" class="form-label">Location</label>
+              <input type="text" id="location" name="location" class="form-input" value="<%= profile.location || 'Based in India' %>">
+            </div>
+
+            <div class="form-group">
+              <label for="statusText" class="form-label">Status Phrase</label>
+              <input type="text" id="statusText" name="statusText" class="form-input" value="<%= profile.statusText || 'Always learning' %>">
+            </div>
+
+            <div class="form-group">
+              <label for="contactEmail" class="form-label">Contact Email Address</label>
+              <input type="email" id="contactEmail" name="contactEmail" class="form-input" value="<%= profile.contactEmail || 'ayushjha@gmail.com' %>">
+            </div>
+          </div>
+        </div>
+
+        <!-- Social Links -->
+        <div class="data-card" style="padding: 2rem;">
+          <h2 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-light);">
+            Social Media Profiles
+          </h2>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="github" class="form-label">GitHub URL</label>
+              <input type="url" id="github" name="github" class="form-input" value="<%= (profile.socialLinks && profile.socialLinks.github) || 'https://github.com/ayushjha' %>">
+            </div>
+
+            <div class="form-group">
+              <label for="linkedin" class="form-label">LinkedIn URL</label>
+              <input type="url" id="linkedin" name="linkedin" class="form-input" value="<%= (profile.socialLinks && profile.socialLinks.linkedin) || 'https://linkedin.com/in/ayushjha' %>">
+            </div>
+
+            <div class="form-group">
+              <label for="twitter" class="form-label">X / Twitter URL</label>
+              <input type="url" id="twitter" name="twitter" class="form-input" value="<%= (profile.socialLinks && profile.socialLinks.twitter) || 'https://x.com/ayushjha' %>">
+            </div>
+
+            <div class="form-group">
+              <label for="instagram" class="form-label">Instagram URL</label>
+              <input type="url" id="instagram" name="instagram" class="form-input" value="<%= (profile.socialLinks && profile.socialLinks.instagram) || 'https://instagram.com/ayushjha' %>">
+            </div>
+
+            <div class="form-group">
+              <label for="youtube" class="form-label">YouTube URL (optional)</label>
+              <input type="url" id="youtube" name="youtube" class="form-input" value="<%= (profile.socialLinks && profile.socialLinks.youtube) || '' %>">
+            </div>
+
+            <div class="form-group">
+              <label for="email" class="form-label">Email URL / Address</label>
+              <input type="text" id="email" name="email" class="form-input" value="<%= (profile.socialLinks && profile.socialLinks.email) || 'ayushjha@gmail.com' %>">
+            </div>
+          </div>
+        </div>
+
+        <!-- SEO & Footer -->
+        <div class="data-card" style="padding: 2rem;">
+          <h2 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-light);">
+            SEO Defaults &amp; Footer
+          </h2>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="seoTitle" class="form-label">Default SEO Title</label>
+              <input type="text" id="seoTitle" name="seoTitle" class="form-input" value="<%= profile.seoTitle || 'Ayush Jha | Ideas. Code. Progress.' %>">
+            </div>
+
+            <div class="form-group">
+              <label for="footerText" class="form-label">Footer Copyright Text</label>
+              <input type="text" id="footerText" name="footerText" class="form-input" value="<%= profile.footerText || '© 2026 Ayush Jha. All rights reserved.' %>">
+            </div>
+
+            <div class="form-group form-full">
+              <label for="seoDescription" class="form-label">Default SEO Meta Description</label>
+              <textarea id="seoDescription" name="seoDescription" class="form-textarea" style="min-height: 70px;"><%= profile.seoDescription || '' %></textarea>
+            </div>
+          </div>
+        </div>
+      </form>
+    </main>
+  </div>
+
+  <script src="/js/theme.js"></script>
+</body>
+</html>

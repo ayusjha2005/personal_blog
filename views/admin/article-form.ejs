@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  
+  <script>
+    (function() {
+      try {
+        var saved = localStorage.getItem('theme');
+        var theme = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {}
+    })();
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="/css/themes.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/admin.css">
+
+  <!-- Marked library for live client-side preview in admin editor -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body class="admin-layout">
+  <%- include('sidebar') %>
+
+  <div class="admin-main">
+    <header class="admin-topbar">
+      <h1 style="font-size: 1.25rem; font-weight: 700;">
+        <%= isEdit ? 'Edit Article' : 'Create New Article' %>
+      </h1>
+      <div style="display: flex; gap: 0.75rem;">
+        <a href="/admin/articles" class="btn-pill-outline">Cancel</a>
+        <button type="submit" form="article-form" class="btn-pill-primary">
+          <%= isEdit ? 'Save Changes' : 'Create Article' %>
+        </button>
+      </div>
+    </header>
+
+    <main class="admin-content">
+      <% if (typeof error !== 'undefined' && error) { %>
+        <div class="alert alert-error" role="alert"><%= error %></div>
+      <% } %>
+
+      <form 
+        id="article-form" 
+        action="<%= isEdit ? '/admin/articles/edit/' + article._id : '/admin/articles/new' %>" 
+        method="POST"
+      >
+        <div class="data-card" style="padding: 2rem;">
+          <div class="form-grid-2">
+            <!-- Title -->
+            <div class="form-group form-full">
+              <label for="title" class="form-label">Article Title *</label>
+              <input 
+                type="text" 
+                id="title" 
+                name="title" 
+                class="form-input" 
+                required 
+                maxlength="200"
+                placeholder="e.g. How I Set Up My Developer Environment"
+                value="<%= article.title || '' %>"
+              >
+            </div>
+
+            <!-- Slug -->
+            <div class="form-group">
+              <label for="slug" class="form-label">Slug (URL identifier) *</label>
+              <input 
+                type="text" 
+                id="slug" 
+                name="slug" 
+                class="form-input" 
+                required 
+                placeholder="e.g. how-i-set-up-my-developer-environment"
+                value="<%= article.slug || '' %>"
+              >
+            </div>
+
+            <!-- Subtitle -->
+            <div class="form-group">
+              <label for="subtitle" class="form-label">Subtitle</label>
+              <input 
+                type="text" 
+                id="subtitle" 
+                name="subtitle" 
+                class="form-input" 
+                placeholder="A short subtitle under the title"
+                value="<%= article.subtitle || '' %>"
+              >
+            </div>
+
+            <!-- Category -->
+            <div class="form-group">
+              <label for="category" class="form-label">Category *</label>
+              <select id="category" name="category" class="category-dropdown-select" style="width: 100%;" required>
+                <% categories.forEach(function(cat) { %>
+                  <option 
+                    value="<%= cat._id %>" 
+                    <%= (article.category && (article.category._id ? article.category._id.toString() : article.category.toString()) === cat._id.toString()) ? 'selected' : '' %>
+                  >
+                    <%= cat.name %>
+                  </option>
+                <% }); %>
+              </select>
+            </div>
+
+            <!-- Status -->
+            <div class="form-group">
+              <label for="status" class="form-label">Publication Status *</label>
+              <select id="status" name="status" class="category-dropdown-select" style="width: 100%;" required>
+                <option value="draft" <%= article.status === 'draft' ? 'selected' : '' %>>Draft (Private)</option>
+                <option value="published" <%= article.status === 'published' ? 'selected' : '' %>>Published (Public)</option>
+              </select>
+            </div>
+
+            <!-- Cover Image URL -->
+            <div class="form-group">
+              <label for="coverImage" class="form-label">Cover Image Path/URL</label>
+              <input 
+                type="text" 
+                id="coverImage" 
+                name="coverImage" 
+                class="form-input" 
+                placeholder="/images/article-productivity.jpg"
+                value="<%= article.coverImage || '/images/article-productivity.jpg' %>"
+              >
+            </div>
+
+            <!-- Tags -->
+            <div class="form-group">
+              <label for="tags" class="form-label">Tags (comma-separated)</label>
+              <input 
+                type="text" 
+                id="tags" 
+                name="tags" 
+                class="form-input" 
+                placeholder="Development, Linux, Productivity"
+                value="<%= article.tags ? (Array.isArray(article.tags) ? article.tags.join(', ') : article.tags) : '' %>"
+              >
+            </div>
+
+            <!-- Featured Checkbox -->
+            <div class="form-group form-full" style="display: flex; align-items: center; gap: 0.5rem;">
+              <input 
+                type="checkbox" 
+                id="isFeatured" 
+                name="isFeatured" 
+                <%= article.isFeatured ? 'checked' : '' %>
+                style="width: 18px; height: 18px; cursor: pointer;"
+              >
+              <label for="isFeatured" style="font-size: 0.95rem; font-weight: 600; cursor: pointer;">
+                Mark as Featured Article (shown prominently on Home page)
+              </label>
+            </div>
+
+            <!-- Excerpt -->
+            <div class="form-group form-full">
+              <label for="excerpt" class="form-label">Excerpt / Summary *</label>
+              <textarea 
+                id="excerpt" 
+                name="excerpt" 
+                class="form-textarea" 
+                style="min-height: 80px;" 
+                required 
+                maxlength="500"
+                placeholder="Short summary for card previews..."
+              ><%= article.excerpt || '' %></textarea>
+            </div>
+
+            <!-- Markdown Content Editor with Live Preview -->
+            <div class="form-group form-full">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <label for="content" class="form-label" style="margin-bottom: 0;">Article Content (Markdown supported) *</label>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">Live Preview on the Right &rarr;</span>
+              </div>
+
+              <div class="markdown-editor-split">
+                <textarea 
+                  id="content" 
+                  name="content" 
+                  class="markdown-textarea" 
+                  required
+                  placeholder="Write your article in Markdown..."
+                ><%= article.content || '' %></textarea>
+
+                <div id="markdown-preview" class="markdown-preview-pane prose">
+                  <!-- Live markdown rendered here -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </main>
+  </div>
+
+  <script src="/js/theme.js"></script>
+  <script>
+    // Live Markdown Preview and Slug auto-generation
+    document.addEventListener('DOMContentLoaded', () => {
+      const titleInput = document.getElementById('title');
+      const slugInput = document.getElementById('slug');
+      const contentTextarea = document.getElementById('content');
+      const previewPane = document.getElementById('markdown-preview');
+
+      // Auto-generate slug from title if slug not customized
+      <% if (!isEdit) { %>
+        titleInput.addEventListener('input', () => {
+          slugInput.value = titleInput.value
+            .toLowerCase()
+            .trim()
+            .replace(/[^\w\s-]/g, '')
+            .replace(/[\s_-]+/g, '-')
+            .replace(/^-+|-+$/g, '');
+        });
+      <% } %>
+
+      // Live markdown rendering
+      function updatePreview() {
+        if (typeof marked !== 'undefined') {
+          previewPane.innerHTML = marked.parse(contentTextarea.value || '*Live preview will appear here as you type...*');
+        }
+      }
+
+      contentTextarea.addEventListener('input', updatePreview);
+      updatePreview();
+    });
+  </script>
+</body>
+</html>

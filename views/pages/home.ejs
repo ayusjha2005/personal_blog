@@ -1,0 +1,172 @@
+<%- include('../partials/head') %>
+<body>
+  <%- include('../partials/navbar') %>
+
+  <main class="site-main" id="main-content">
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="container">
+        <div class="hero-card">
+          <div class="hero-bg-wrapper">
+            <img src="/images/hero-mountain.jpg" alt="Mountain summit at sunset" class="hero-bg-img" fetchpriority="high">
+            <div class="hero-overlay"></div>
+          </div>
+
+          <div class="hero-content">
+            <h1 class="hero-title"><%= profile.heroHeadline || 'Ideas. Code. Progress.' %></h1>
+            <p class="hero-subtitle">
+              <%= profile.bio || "A personal blog where I share my journey in technology, development, college life and everything I'm learning along the way." %>
+            </p>
+            <div class="hero-cta-group">
+              <% if (featuredArticle) { %>
+                <a href="/blog/<%= featuredArticle.slug %>" class="btn-pill-primary">
+                  <span>Read Latest Post</span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                  </svg>
+                </a>
+              <% } else { %>
+                <a href="/blog" class="btn-pill-primary">Explore Articles</a>
+              <% } %>
+              <a href="/about" class="btn-pill-outline">About Me</a>
+            </div>
+          </div>
+
+          <div class="hero-script-phrase script-font">
+            <%= profile.heroScriptQuote || 'Better Code, Brighter Days' %>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Topic Navigation Bar -->
+    <section class="topic-nav-section" aria-label="Topic Navigation">
+      <div class="container">
+        <nav class="topic-bar">
+          <a href="/blog?category=web-development" class="topic-item">
+            <svg class="topic-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+              <line x1="8" y1="21" x2="16" y2="21"></line>
+              <line x1="12" y1="17" x2="12" y2="21"></line>
+            </svg>
+            <span>Web Development</span>
+          </a>
+
+          <a href="/blog?category=dsa" class="topic-item">
+            <svg class="topic-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="12 2 2 7 12 12 22 7 12 2></polygon>
+              <polyline points="2 17 12 22 22 17"></polyline>
+              <polyline points="2 12 12 17 22 12"></polyline>
+            </svg>
+            <span>DSA &amp; Algorithms</span>
+          </a>
+
+          <a href="/blog?category=linux" class="topic-item">
+            <svg class="topic-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="4 17 10 11 4 5"></polyline>
+              <line x1="12" y1="19" x2="20" y2="19"></line>
+            </svg>
+            <span>Linux &amp; Tools</span>
+          </a>
+
+          <a href="/blog?category=projects" class="topic-item">
+            <svg class="topic-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <span>Projects &amp; Hackathons</span>
+          </a>
+
+          <a href="/blog?category=career" class="topic-item">
+            <svg class="topic-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+              <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+            </svg>
+            <span>Career &amp; Internships</span>
+          </a>
+        </nav>
+      </div>
+    </section>
+
+    <!-- Featured Article Section -->
+    <% if (featuredArticle) { %>
+      <section class="featured-section">
+        <div class="container">
+          <div class="section-header">
+            <h2 class="section-title">Featured Article</h2>
+            <a href="/blog" class="section-link">
+              <span>View all</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </a>
+          </div>
+
+          <div class="featured-card">
+            <a href="/blog/<%= featuredArticle.slug %>" class="featured-img-wrap" aria-label="<%= featuredArticle.title %>">
+              <img src="<%= featuredArticle.coverImage || '/images/article-productivity.jpg' %>" alt="<%= featuredArticle.title %>" class="featured-img">
+              <% if (featuredArticle.category) { %>
+                <span class="category-badge badge-on-image"><%= featuredArticle.category.name || featuredArticle.category %></span>
+              <% } %>
+            </a>
+            <div class="featured-content">
+              <div class="article-meta">
+                <time datetime="<%= formatISODate(featuredArticle.publishedAt || featuredArticle.createdAt) %>">
+                  <%= formatDate(featuredArticle.publishedAt || featuredArticle.createdAt) %>
+                </time>
+                <span>&bull;</span>
+                <span><%= featuredArticle.readingTime || 8 %> min read</span>
+              </div>
+              <h3 class="featured-title">
+                <a href="/blog/<%= featuredArticle.slug %>"><%= featuredArticle.title %></a>
+              </h3>
+              <p class="featured-excerpt"><%= featuredArticle.excerpt %></p>
+              <div>
+                <a href="/blog/<%= featuredArticle.slug %>" class="read-more-link">
+                  <span>Read more</span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                  </svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    <% } %>
+
+    <!-- Latest Posts Section -->
+    <section class="latest-posts-section">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">Latest Posts</h2>
+          <a href="/blog" class="section-link">
+            <span>View all</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </a>
+        </div>
+
+        <div class="posts-grid">
+          <% if (latestArticles && latestArticles.length > 0) { %>
+            <% latestArticles.forEach(function(article) { %>
+              <%- include('../partials/article-card', { article: article }) %>
+            <% }); %>
+          <% } else { %>
+            <p>No articles published yet.</p>
+          <% } %>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <%- include('../partials/footer') %>
+
+  <script src="/js/theme.js"></script>
+  <script src="/js/main.js"></script>
+</body>
+</html>

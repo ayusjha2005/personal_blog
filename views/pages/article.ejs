@@ -1,0 +1,150 @@
+<%- include('../partials/head') %>
+<body>
+  <!-- Reading Progress Bar -->
+  <div class="reading-progress-bar" role="progressbar" aria-label="Reading Progress"></div>
+
+  <%- include('../partials/navbar') %>
+
+  <main class="site-main article-reading-section" id="main-content">
+    <div class="container">
+      <!-- Breadcrumb Navigation -->
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="/">Home</a>
+        <span>&rsaquo;</span>
+        <a href="/blog">Blog</a>
+        <% if (article.category) { %>
+          <span>&rsaquo;</span>
+          <a href="/blog?category=<%= article.category.slug %>"><%= article.category.name %></a>
+        <% } %>
+      </nav>
+
+      <!-- Article Header -->
+      <header class="article-header">
+        <h1 class="article-title-main"><%= article.title %></h1>
+        <% if (article.subtitle) { %>
+          <p class="article-subtitle-main"><%= article.subtitle %></p>
+        <% } %>
+
+        <div class="author-bar">
+          <div class="author-info">
+            <img src="<%= profile.profileImage || '/images/profile.jpg' %>" alt="<%= profile.name %>" class="author-avatar">
+            <div class="author-meta">
+              <span class="author-name">By <%= profile.name || 'Ayush Jha' %></span>
+              <span>&bull;</span>
+              <time datetime="<%= formatISODate(article.publishedAt || article.createdAt) %>">
+                <%= formatDate(article.publishedAt || article.createdAt) %>
+              </time>
+              <span>&bull;</span>
+              <span><%= article.readingTime || 5 %> min read</span>
+            </div>
+          </div>
+
+          <div class="article-actions">
+            <button class="icon-btn bookmark-btn" data-slug="<%= article.slug %>" type="button" aria-label="Bookmark article" title="Bookmark">
+              <svg class="bookmark-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+              </svg>
+            </button>
+            <button class="icon-btn share-btn" type="button" aria-label="Share article" title="Share">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="18" cy="5" r="3"></circle>
+                <circle cx="6" cy="12" r="3"></circle>
+                <circle cx="18" cy="19" r="3"></circle>
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Full-Width Hero Cover Image -->
+      <% if (article.coverImage) { %>
+        <div class="article-hero-cover">
+          <img src="<%= article.coverImage %>" alt="<%= article.title %>">
+        </div>
+      <% } %>
+
+      <!-- Reading Layout Grid (Main Content & Sidebar) -->
+      <div class="article-layout-grid">
+        <!-- Main Reading Column -->
+        <article class="prose">
+          <%- contentHtml %>
+        </article>
+
+        <!-- Sidebar (Table of Contents & Related Articles) -->
+        <aside class="article-sidebar" aria-label="Article Sidebar">
+          <% if (tableOfContents && tableOfContents.length > 0) { %>
+            <div class="sidebar-card">
+              <h2 class="sidebar-title">Table of Contents</h2>
+              <ul class="toc-list">
+                <% tableOfContents.forEach(function(item) { %>
+                  <li>
+                    <a href="#<%= item.id %>" class="toc-link"><%= item.text %></a>
+                  </li>
+                <% }); %>
+              </ul>
+            </div>
+          <% } %>
+
+          <% if (relatedArticles && relatedArticles.length > 0) { %>
+            <div class="sidebar-card">
+              <h2 class="sidebar-title">Related Articles</h2>
+              <div class="related-list">
+                <% relatedArticles.forEach(function(rel) { %>
+                  <a href="/blog/<%= rel.slug %>" class="related-item">
+                    <img src="<%= rel.coverImage || '/images/article-productivity.jpg' %>" alt="<%= rel.title %>" class="related-thumb" loading="lazy">
+                    <div>
+                      <h3 class="related-item-title"><%= truncate(rel.title, 50) %></h3>
+                      <span class="related-item-date"><%= formatDate(rel.publishedAt || rel.createdAt) %></span>
+                    </div>
+                  </a>
+                <% }); %>
+              </div>
+            </div>
+          <% } %>
+        </aside>
+      </div>
+
+      <!-- Previous & Next Navigation Bar -->
+      <% if (prevArticle || nextArticle) { %>
+        <nav class="prev-next-section" aria-label="Adjacent Articles">
+          <% if (prevArticle) { %>
+            <a href="/blog/<%= prevArticle.slug %>" class="prev-next-card prev">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+              </svg>
+              <div>
+                <div class="prev-next-label">Previous</div>
+                <div class="prev-next-title"><%= truncate(prevArticle.title, 45) %></div>
+              </div>
+            </a>
+          <% } else { %>
+            <div></div>
+          <% } %>
+
+          <% if (nextArticle) { %>
+            <a href="/blog/<%= nextArticle.slug %>" class="prev-next-card next">
+              <div>
+                <div class="prev-next-label">Next</div>
+                <div class="prev-next-title"><%= truncate(nextArticle.title, 45) %></div>
+              </div>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </a>
+          <% } %>
+        </nav>
+      <% } %>
+    </div>
+  </main>
+
+  <%- include('../partials/footer') %>
+
+  <script src="/js/theme.js"></script>
+  <script src="/js/main.js"></script>
+  <script src="/js/article.js"></script>
+</body>
+</html>

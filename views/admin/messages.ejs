@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  
+  <script>
+    (function() {
+      try {
+        var saved = localStorage.getItem('theme');
+        var theme = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {}
+    })();
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="/css/themes.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="admin-layout">
+  <%- include('sidebar') %>
+
+  <div class="admin-main">
+    <header class="admin-topbar">
+      <h1 style="font-size: 1.25rem; font-weight: 700;">Contact Messages Inbox</h1>
+      <div>
+        <span style="font-size: 0.85rem; color: var(--text-muted);">
+          <%= unreadCount %> unread of <%= totalMessages %> total
+        </span>
+      </div>
+    </header>
+
+    <main class="admin-content">
+      <!-- Filter Chips -->
+      <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem;">
+        <a href="/admin/messages" class="filter-chip <%= !currentStatus ? 'active' : '' %>">All (<%= totalMessages %>)</a>
+        <a href="/admin/messages?status=unread" class="filter-chip <%= currentStatus === 'unread' ? 'active' : '' %>">Unread (<%= unreadCount %>)</a>
+        <a href="/admin/messages?status=read" class="filter-chip <%= currentStatus === 'read' ? 'active' : '' %>">Read</a>
+      </div>
+
+      <!-- Messages Table -->
+      <div class="data-card">
+        <div style="overflow-x: auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Sender</th>
+                <th>Subject</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (messages && messages.length > 0) { %>
+                <% messages.forEach(function(msg) { %>
+                  <tr style="<%= msg.status === 'unread' ? 'font-weight: 600;' : '' %>">
+                    <td>
+                      <div><%= msg.name %></div>
+                      <a href="mailto:<%= msg.email %>" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 400;"><%= msg.email %></a>
+                    </td>
+                    <td>
+                      <div><%= msg.subject %></div>
+                      <div style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 400; max-width: 400px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        <%= msg.message %>
+                      </div>
+                    </td>
+                    <td style="font-size: 0.85rem; color: var(--text-muted);"><%= formatDate(msg.createdAt) %></td>
+                    <td>
+                      <span class="table-status-pill <%= msg.status === 'read' ? 'status-published' : 'status-draft' %>">
+                        <%= msg.status %>
+                      </span>
+                    </td>
+                    <td>
+                      <div class="table-actions">
+                        <!-- View Modal Trigger -->
+                        <button 
+                          type="button" 
+                          class="icon-btn" 
+                          title="View Message"
+                          onclick="viewMessage('<%= msg.name.replace(/'/g, "\\'") %>', '<%= msg.email.replace(/'/g, "\\'") %>', '<%= msg.subject.replace(/'/g, "\\'") %>', '<%= msg.message.replace(/'/g, "\\'").replace(/\n/g, '<br>') %>', '<%= formatDate(msg.createdAt) %>')"
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                          </svg>
+                        </button>
+
+                        <!-- Mark as Read / Unread -->
+                        <form action="/admin/messages/<%= msg._id %>/mark" method="POST" style="display: inline;">
+                          <input type="hidden" name="action" value="<%= msg.status === 'unread' ? 'read' : 'unread' %>">
+                          <button type="submit" class="icon-btn" title="<%= msg.status === 'unread' ? 'Mark as Read' : 'Mark as Unread' %>">
+                            <% if (msg.status === 'unread') { %>
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                              </svg>
+                            <% } else { %>
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 14 14"></polyline>
+                              </svg>
+                            <% } %>
+                          </button>
+                        </form>
+
+                        <!-- Delete Message -->
+                        <form action="/admin/messages/<%= msg._id %>/delete" method="POST" onsubmit="return confirm('Are you sure you want to delete this message?');" style="display: inline;">
+                          <button type="submit" class="icon-btn" title="Delete Message" style="color: var(--accent-highlight);">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                              <polyline points="3 6 5 6 21 6"></polyline>
+                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                          </button>
+                        </form>
+                      </div>
+                    </td>
+                  </tr>
+                <% }); %>
+              <% } else { %>
+                <tr>
+                  <td colspan="5" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                    No contact messages found.
+                  </td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <% if (totalPages > 1) { %>
+        <div style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 1.5rem;">
+          <% for (let i = 1; i <= totalPages; i++) { %>
+            <a href="/admin/messages?page=<%= i %><%= currentStatus ? '&status=' + currentStatus : '' %>" class="page-btn <%= i === currentPage ? 'active' : '' %>">
+              <%= i %>
+            </a>
+          <% } %>
+        </div>
+      <% } %>
+    </main>
+  </div>
+
+  <!-- Message Detail Modal Dialog -->
+  <dialog id="message-modal" style="margin: auto; border: 1px solid var(--border-light); border-radius: var(--radius-lg); background-color: var(--bg-surface); color: var(--text-primary); max-width: 550px; width: 90%; padding: 2rem; box-shadow: var(--shadow-lg);">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+      <h3 id="modal-subject" style="font-size: 1.25rem; font-weight: 700;"></h3>
+      <button onclick="document.getElementById('message-modal').close()" class="icon-btn">&times;</button>
+    </div>
+    <div style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+      <span id="modal-sender" style="font-weight: 600; color: var(--text-primary);"></span>
+      (<span id="modal-email"></span>) &bull; <span id="modal-date"></span>
+    </div>
+    <div id="modal-body" style="font-size: 0.95rem; line-height: 1.6; padding: 1rem; background-color: var(--bg-surface-elevated); border-radius: var(--radius-md); margin-bottom: 1.5rem; white-space: pre-wrap;"></div>
+    <div style="display: flex; justify-content: flex-end;">
+      <button onclick="document.getElementById('message-modal').close()" class="btn-pill-primary">Close</button>
+    </div>
+  </dialog>
+
+  <script src="/js/theme.js"></script>
+  <script>
+    function viewMessage(name, email, subject, message, date) {
+      document.getElementById('modal-subject').textContent = subject;
+      document.getElementById('modal-sender').textContent = name;
+      document.getElementById('modal-email').textContent = email;
+      document.getElementById('modal-date').textContent = date;
+      document.getElementById('modal-body').innerHTML = message;
+      document.getElementById('message-modal').showModal();
+    }
+  </script>
+</body>
+</html>

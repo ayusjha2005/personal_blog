@@ -1,0 +1,23 @@
+<article class="post-card">
+  <a href="/blog/<%= article.slug %>" class="post-card-img-wrap" aria-label="<%= article.title %>">
+    <img src="<%= article.coverImage || '/images/article-productivity.jpg' %>" alt="<%= article.title %>" class="post-card-img" loading="lazy">
+    <% if (article.category) { %>
+      <span class="category-badge badge-on-image"><%= article.category.name || article.category %></span>
+    <% } %>
+  </a>
+  <div class="post-card-body">
+    <h3 class="post-card-title">
+      <a href="/blog/<%= article.slug %>"><%= article.title %></a>
+    </h3>
+    <p class="article-row-excerpt"><%= truncate(article.excerpt, 110) %></p>
+    <div class="post-card-meta">
+      <span><%= formatDate(article.publishedAt || article.createdAt) %> &bull; <%= article.readingTime || 5 %> min read</span>
+      <a href="/blog/<%= article.slug %>" class="read-more-link" aria-label="Read <%= article.title %>">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+          <polyline points="12 5 19 12 12 19"></polyline>
+        </svg>
+      </a>
+    </div>
+  </div>
+</article>

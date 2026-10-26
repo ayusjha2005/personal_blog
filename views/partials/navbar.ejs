@@ -1,0 +1,91 @@
+<header class="site-header">
+  <div class="container nav-container">
+    <a href="/" class="nav-brand" aria-label="Ayush Jha Home">
+      <span>Ayush Jha</span>
+    </a>
+
+    <nav aria-label="Main Navigation">
+      <ul class="nav-menu">
+        <li>
+          <a href="/" class="nav-link <%= activePage === 'home' ? 'active' : '' %>">Home</a>
+        </li>
+        <li>
+          <a href="/blog" class="nav-link <%= activePage === 'blog' ? 'active' : '' %>">Blog</a>
+        </li>
+        <li>
+          <a href="/about" class="nav-link <%= activePage === 'about' ? 'active' : '' %>">About</a>
+        </li>
+        <li>
+          <a href="/contact" class="nav-link <%= activePage === 'contact' ? 'active' : '' %>">Contact</a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="nav-actions">
+      <!-- Search Button -->
+      <a href="/blog" class="icon-btn search-trigger-btn" aria-label="Search articles" title="Search">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+      </a>
+
+      <!-- Dark/Light Theme Toggle -->
+      <button class="icon-btn theme-toggle-btn" aria-label="Toggle color theme" title="Toggle theme">
+        <!-- Moon Icon (shown in light mode) -->
+        <svg class="moon-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+        <!-- Sun Icon (shown in dark mode) -->
+        <svg class="sun-icon" style="display: none;" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+      </button>
+
+      <!-- Follow Button -->
+      <button class="btn-pill-primary follow-btn" type="button" aria-label="Follow blog updates">
+        Follow
+      </button>
+
+      <!-- Mobile Menu Button -->
+      <button class="icon-btn mobile-menu-btn" aria-label="Toggle navigation menu" aria-expanded="false">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Collapsible Menu Drawer -->
+  <div class="mobile-nav-drawer" id="mobile-nav-drawer">
+    <ul class="mobile-nav-list">
+      <li>
+        <a href="/" class="mobile-nav-link <%= activePage === 'home' ? 'active' : '' %>">Home</a>
+      </li>
+      <li>
+        <a href="/blog" class="mobile-nav-link <%= activePage === 'blog' ? 'active' : '' %>">Blog</a>
+      </li>
+      <li>
+        <a href="/about" class="mobile-nav-link <%= activePage === 'about' ? 'active' : '' %>">About</a>
+      </li>
+      <li>
+        <a href="/contact" class="mobile-nav-link <%= activePage === 'contact' ? 'active' : '' %>">Contact</a>
+      </li>
+      <% if (isAuth) { %>
+        <li>
+          <a href="/admin" class="mobile-nav-link">Admin Dashboard</a>
+        </li>
+      <% } %>
+    </ul>
+  </div>
+</header>

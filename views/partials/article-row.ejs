@@ -1,0 +1,28 @@
+<article class="article-row-card">
+  <a href="/blog/<%= article.slug %>" class="article-row-img-wrap" aria-label="<%= article.title %>">
+    <img src="<%= article.coverImage || '/images/article-productivity.jpg' %>" alt="<%= article.title %>" class="article-row-img" loading="lazy">
+  </a>
+  <div class="article-row-content">
+    <div class="article-row-header">
+      <% if (article.category) { %>
+        <span class="category-badge"><%= article.category.name || article.category %></span>
+      <% } %>
+      <button class="icon-btn bookmark-btn" data-slug="<%= article.slug %>" type="button" aria-label="Bookmark article" title="Bookmark">
+        <svg class="bookmark-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+        </svg>
+      </button>
+    </div>
+    <h2 class="article-row-title">
+      <a href="/blog/<%= article.slug %>"><%= article.title %></a>
+    </h2>
+    <p class="article-row-excerpt"><%= truncate(article.excerpt, 150) %></p>
+    <div class="article-row-footer">
+      <time datetime="<%= formatISODate(article.publishedAt || article.createdAt) %>">
+        <%= formatDate(article.publishedAt || article.createdAt) %>
+      </time>
+      <span>&bull;</span>
+      <span><%= article.readingTime || 5 %> min read</span>
+    </div>
+  </div>
+</article>

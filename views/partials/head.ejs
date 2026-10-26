@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= typeof title !== 'undefined' ? title : 'Ayush Jha | Ideas. Code. Progress.' %></title>
+  
+  <meta name="description" content="<%= profile.seoDescription || 'Personal developer journal of Ayush Jha covering web development, DSA, Linux, databases, and projects.' %>">
+  <meta name="author" content="<%= profile.name || 'Ayush Jha' %>">
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="<%= typeof title !== 'undefined' ? title : 'Ayush Jha | Ideas. Code. Progress.' %>">
+  <meta property="og:description" content="<%= profile.seoDescription || 'Ideas. Code. Progress.' %>">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="<%= profile.profileImage || '/images/hero-mountain.jpg' %>">
+
+  <!-- Early Theme Detection to prevent theme flash (FOUC) -->
+  <script>
+    (function() {
+      try {
+        var saved = localStorage.getItem('theme');
+        var theme = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {}
+    })();
+  </script>
+
+  <!-- Google Fonts Preconnect -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="/css/themes.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/responsive.css">
+</head>

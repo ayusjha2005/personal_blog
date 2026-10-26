@@ -1,0 +1,86 @@
+<%- include('../partials/head') %>
+<body>
+  <%- include('../partials/navbar') %>
+
+  <main class="site-main" id="main-content">
+    <div class="container">
+      <header class="blog-header">
+        <h1 class="blog-page-title">All Articles</h1>
+        <p class="blog-page-desc">Thoughts, tutorials, and notes on technology, development and life.</p>
+
+        <!-- Search & Category Dropdown Form -->
+        <form action="/blog" method="GET" class="blog-controls-bar" role="search">
+          <div class="search-input-group">
+            <svg class="search-icon-inside" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input 
+              type="text" 
+              name="q" 
+              class="search-input" 
+              placeholder="Search articles, topics, or keywords..." 
+              value="<%= searchQuery || '' %>"
+              aria-label="Search articles"
+            >
+          </div>
+
+          <select name="category" class="category-dropdown-select" onchange="this.form.submit()" aria-label="Filter by category">
+            <option value="all">All Categories</option>
+            <% categories.forEach(function(cat) { %>
+              <option value="<%= cat.slug %>" <%= currentCategory === cat.slug ? 'selected' : '' %>>
+                <%= cat.name %>
+              </option>
+            <% }); %>
+          </select>
+
+          <% if (sortOrder && sortOrder !== 'newest') { %>
+            <input type="hidden" name="sort" value="<%= sortOrder %>">
+          <% } %>
+        </form>
+
+        <!-- Filter Chips Bar -->
+        <div class="chips-bar" aria-label="Category Filters">
+          <a href="/blog<%= searchQuery ? '?q=' + encodeURIComponent(searchQuery) : '' %>" class="filter-chip <%= !currentCategory || currentCategory === 'all' ? 'active' : '' %>">
+            All
+          </a>
+          <% categories.forEach(function(cat) { %>
+            <a href="/blog?category=<%= cat.slug %><%= searchQuery ? '&q=' + encodeURIComponent(searchQuery) : '' %>" class="filter-chip <%= currentCategory === cat.slug ? 'active' : '' %>">
+              <%= cat.name %>
+            </a>
+          <% }); %>
+        </div>
+      </header>
+
+      <!-- Articles Listing -->
+      <section class="articles-list" aria-label="Articles">
+        <% if (articles && articles.length > 0) { %>
+          <% articles.forEach(function(article) { %>
+            <%- include('../partials/article-row', { article: article }) %>
+          <% }); %>
+        <% } else { %>
+          <div class="data-card" style="padding: 3rem; text-align: center;">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin: 0 auto 1rem; color: var(--text-muted);">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem;">No articles found</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+              We couldn't find any articles matching your search criteria.
+            </p>
+            <a href="/blog" class="btn-pill-primary">Clear Filters</a>
+          </div>
+        <% } %>
+      </section>
+
+      <!-- Server-Side Pagination -->
+      <%- include('../partials/pagination') %>
+    </div>
+  </main>
+
+  <%- include('../partials/footer') %>
+
+  <script src="/js/theme.js"></script>
+  <script src="/js/main.js"></script>
+</body>
+</html>
