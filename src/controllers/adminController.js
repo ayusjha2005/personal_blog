@@ -8,7 +8,7 @@ const articleService = require('../services/articleService');
 const profileService = require('../services/profileService');
 const contactService = require('../services/contactService');
 const slugify = require('slugify');
-const { deleteOldUpload } = require('../middleware/upload');
+const { deleteOldUpload, processImageUpload } = require('../middleware/upload');
 
 // Admin Auth
 function getLogin(req, res) {
@@ -204,25 +204,41 @@ async function postNewArticle(req, res, next) {
 
     // Determine cover image: uploaded file first, then fallback
     let coverImagePath = '/images/article-productivity.jpg';
+    let coverImagePublicId = null;
+    let uploadedAsset = null;
+
     if (req.file) {
-      coverImagePath = `/uploads/${req.file.filename}`;
+      uploadedAsset = await processImageUpload(req.file, 'personal-blog/articles');
+      if (uploadedAsset) {
+        coverImagePath = uploadedAsset.url;
+        coverImagePublicId = uploadedAsset.publicId;
+      }
     } else if (req.body.coverImage) {
       coverImagePath = req.body.coverImage;
     }
 
-    await articleService.createArticle({
-      title,
-      slug: generatedSlug,
-      subtitle: subtitle || '',
-      excerpt,
-      content,
-      category,
-      tags: tagsArray,
-      coverImage: coverImagePath,
-      status: status || 'draft',
-      isFeatured: isFeatured === 'true' || isFeatured === true || isFeatured === 'on',
-      publishedAt: status === 'published' ? new Date() : null,
-    });
+    try {
+      await articleService.createArticle({
+        title,
+        slug: generatedSlug,
+        subtitle: subtitle || '',
+        excerpt,
+        content,
+        category,
+        tags: tagsArray,
+        coverImage: coverImagePath,
+        coverImagePublicId,
+        status: status || 'draft',
+        isFeatured: isFeatured === 'true' || isFeatured === true || isFeatured === 'on',
+        publishedAt: status === 'published' ? new Date() : null,
+      });
+    } catch (dbErr) {
+      // If DB creation fails, safely delete the newly uploaded asset
+      if (uploadedAsset) {
+        await deleteOldUpload(uploadedAsset.url, uploadedAsset.publicId);
+      }
+      throw dbErr;
+    }
 
     res.redirect('/admin/articles');
   } catch (error) {
@@ -309,27 +325,52 @@ async function postEditArticle(req, res, next) {
 
     // Determine cover image: uploaded file > retain existing
     let coverImagePath = existingArticle.coverImage;
+    let coverImagePublicId = existingArticle.coverImagePublicId || null;
+    let uploadedAsset = null;
+    let oldCoverToDelete = null;
+
     if (req.file) {
-      coverImagePath = `/uploads/${req.file.filename}`;
-      // Clean up old uploaded file
-      deleteOldUpload(existingArticle.coverImage);
+      uploadedAsset = await processImageUpload(req.file, 'personal-blog/articles');
+      if (uploadedAsset) {
+        coverImagePath = uploadedAsset.url;
+        coverImagePublicId = uploadedAsset.publicId;
+        // Schedule old asset deletion only after DB update succeeds
+        oldCoverToDelete = {
+          url: existingArticle.coverImage,
+          publicId: existingArticle.coverImagePublicId,
+        };
+      }
     } else if (req.body.existingCoverImage) {
       coverImagePath = req.body.existingCoverImage;
     }
 
-    await articleService.updateArticle(id, {
-      title,
-      slug: generatedSlug,
-      subtitle: subtitle || '',
-      excerpt,
-      content,
-      category,
-      tags: tagsArray,
-      coverImage: coverImagePath,
-      status: status || 'draft',
-      isFeatured: isFeatured === 'true' || isFeatured === true || isFeatured === 'on',
-      publishedAt,
-    });
+    try {
+      await articleService.updateArticle(id, {
+        title,
+        slug: generatedSlug,
+        subtitle: subtitle || '',
+        excerpt,
+        content,
+        category,
+        tags: tagsArray,
+        coverImage: coverImagePath,
+        coverImagePublicId,
+        status: status || 'draft',
+        isFeatured: isFeatured === 'true' || isFeatured === true || isFeatured === 'on',
+        publishedAt,
+      });
+
+      // DB update succeeded: safely delete the previous asset if it was replaced
+      if (oldCoverToDelete) {
+        await deleteOldUpload(oldCoverToDelete.url, oldCoverToDelete.publicId);
+      }
+    } catch (dbErr) {
+      // If DB update fails, clean up the newly uploaded asset
+      if (uploadedAsset) {
+        await deleteOldUpload(uploadedAsset.url, uploadedAsset.publicId);
+      }
+      throw dbErr;
+    }
 
     res.redirect('/admin/articles');
   } catch (error) {
@@ -342,8 +383,8 @@ async function postDeleteArticle(req, res, next) {
   try {
     const { id } = req.params;
     const article = await Article.findById(id).lean();
-    if (article && article.coverImage) {
-      deleteOldUpload(article.coverImage);
+    if (article) {
+      await deleteOldUpload(article.coverImage, article.coverImagePublicId);
     }
     await articleService.deleteArticle(id);
     res.redirect('/admin/articles');
@@ -420,41 +461,64 @@ async function postProfile(req, res, next) {
     // Determine profile image: uploaded file > existing
     const existingProfile = await profileService.getProfile();
     let profileImagePath = existingProfile.profileImage || '/images/profile.jpg';
+    let profileImagePublicId = existingProfile.profileImagePublicId || null;
+    let uploadedAsset = null;
+    let oldProfileToDelete = null;
+
     if (req.file) {
-      profileImagePath = `/uploads/${req.file.filename}`;
-      deleteOldUpload(existingProfile.profileImage);
+      uploadedAsset = await processImageUpload(req.file, 'personal-blog/profile');
+      if (uploadedAsset) {
+        profileImagePath = uploadedAsset.url;
+        profileImagePublicId = uploadedAsset.publicId;
+        oldProfileToDelete = {
+          url: existingProfile.profileImage,
+          publicId: existingProfile.profileImagePublicId,
+        };
+      }
     } else if (req.body.existingProfileImage) {
       profileImagePath = req.body.existingProfileImage;
     } else if (req.body.profileImage) {
       profileImagePath = req.body.profileImage;
     }
 
-    await profileService.updateProfile({
-      name,
-      heroHeadline,
-      bio,
-      extendedBio,
-      tagline,
-      heroScriptQuote,
-      aboutScriptQuote,
-      contactScriptQuote,
-      profileImage: profileImagePath,
-      degree,
-      location,
-      statusText,
-      socialLinks: {
-        github,
-        linkedin,
-        twitter,
-        instagram,
-        youtube: youtube || '',
-        email,
-      },
-      contactEmail,
-      footerText,
-      seoTitle,
-      seoDescription,
-    });
+    try {
+      await profileService.updateProfile({
+        name,
+        heroHeadline,
+        bio,
+        extendedBio,
+        tagline,
+        heroScriptQuote,
+        aboutScriptQuote,
+        contactScriptQuote,
+        profileImage: profileImagePath,
+        profileImagePublicId,
+        degree,
+        location,
+        statusText,
+        socialLinks: {
+          github,
+          linkedin,
+          twitter,
+          instagram,
+          youtube: youtube || '',
+          email,
+        },
+        contactEmail,
+        footerText,
+        seoTitle,
+        seoDescription,
+      });
+
+      if (oldProfileToDelete) {
+        await deleteOldUpload(oldProfileToDelete.url, oldProfileToDelete.publicId);
+      }
+    } catch (dbErr) {
+      if (uploadedAsset) {
+        await deleteOldUpload(uploadedAsset.url, uploadedAsset.publicId);
+      }
+      throw dbErr;
+    }
 
     const [updatedProfile, unreadCount] = await Promise.all([
       profileService.getProfile(),

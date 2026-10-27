@@ -1,23 +1,10 @@
-/**
- * Image Upload Middleware (Multer)
- *
- * Handles multipart/form-data file uploads for article cover images
- * and profile photographs. Validates file types via MIME, enforces
- * a 5 MB size limit, and generates safe unique filenames.
- *
- * STORAGE NOTE: Files are stored locally in public/uploads/.
- * This will NOT persist on ephemeral hosting platforms (Heroku, Railway,
- * Render free-tier, etc.). To use persistent storage, replace the
- * diskStorage configuration with a cloud-storage engine such as
- * multer-s3, @google-cloud/storage, or Cloudinary.
- */
-
 const multer = require('multer');
 const path = require('path');
 const crypto = require('crypto');
 const fs = require('fs');
+const cloudinaryConfig = require('../config/cloudinary');
 
-// Ensure the upload directory exists
+// Ensure the local upload directory exists (used for existing local uploads & dev fallback)
 const UPLOAD_DIR = path.join(__dirname, '../../public/uploads');
 if (!fs.existsSync(UPLOAD_DIR)) {
   fs.mkdirSync(UPLOAD_DIR, { recursive: true });
@@ -32,25 +19,10 @@ const ALLOWED_TYPES = {
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 
-// Generate a safe, unique filename using crypto random bytes
-function generateFilename(originalname, mimetype) {
-  const ext = ALLOWED_TYPES[mimetype] || path.extname(originalname).toLowerCase();
-  const uniqueId = crypto.randomBytes(16).toString('hex');
-  const timestamp = Date.now();
-  return `${timestamp}-${uniqueId}${ext}`;
-}
+// Memory storage configuration for Vercel and serverless compatibility
+const storage = multer.memoryStorage();
 
-// Disk storage configuration
-const storage = multer.diskStorage({
-  destination: function (_req, _file, cb) {
-    cb(null, UPLOAD_DIR);
-  },
-  filename: function (_req, file, cb) {
-    cb(null, generateFilename(file.originalname, file.mimetype));
-  },
-});
-
-// File filter: validate actual MIME type
+// File filter: validate MIME type
 function fileFilter(_req, file, cb) {
   if (ALLOWED_TYPES[file.mimetype]) {
     cb(null, true);
@@ -100,31 +72,69 @@ function handleUploadError(fieldName) {
 }
 
 /**
- * Safely delete an old uploaded file if it exists within public/uploads/.
- * Does nothing for default placeholder images or external URLs.
+ * Processes an uploaded file from req.file.
+ * If Cloudinary is configured, uploads the buffer to Cloudinary.
+ * Otherwise, in local dev, falls back to saving in public/uploads/ without crashing.
+ *
+ * @param {Object} file - req.file object from multer (contains buffer)
+ * @param {string} folder - subfolder or category
+ * @returns {Promise<{ url: string, publicId: string|null }>}
  */
-function deleteOldUpload(imagePath) {
-  if (!imagePath || !imagePath.startsWith('/uploads/')) {
-    return; // Not a locally uploaded file — don't touch it
+async function processImageUpload(file, folder = 'personal-blog') {
+  if (!file || !file.buffer) return null;
+
+  if (cloudinaryConfig.isConfigured()) {
+    const result = await cloudinaryConfig.uploadBuffer(file.buffer, { folder });
+    return {
+      url: result.secure_url,
+      publicId: result.public_id,
+    };
   }
 
-  const filename = path.basename(imagePath);
-  const fullPath = path.join(UPLOAD_DIR, filename);
+  // Fallback for local development if Cloudinary credentials are not set yet
+  const ext = ALLOWED_TYPES[file.mimetype] || path.extname(file.originalname).toLowerCase();
+  const uniqueId = crypto.randomBytes(16).toString('hex');
+  const filename = `${Date.now()}-${uniqueId}${ext}`;
+  const localFilePath = path.join(UPLOAD_DIR, filename);
 
-  // Safety: ensure the resolved path is within UPLOAD_DIR
-  if (!fullPath.startsWith(UPLOAD_DIR)) {
-    return;
-  }
+  await fs.promises.writeFile(localFilePath, file.buffer);
+  return {
+    url: `/uploads/${filename}`,
+    publicId: null,
+  };
+}
 
-  fs.unlink(fullPath, (err) => {
-    if (err && err.code !== 'ENOENT') {
-      console.error(`[Upload] Failed to delete old file: ${fullPath}`, err.message);
+/**
+ * Safely delete an old image asset.
+ * If publicId is provided, deletes from Cloudinary.
+ * If it's an old local file in public/uploads/, removes it locally.
+ */
+async function deleteOldUpload(imagePath, publicId = null) {
+  if (publicId && cloudinaryConfig.isConfigured()) {
+    try {
+      await cloudinaryConfig.deleteImage(publicId);
+      return;
+    } catch (err) {
+      console.error(`[Upload] Failed to delete Cloudinary asset ${publicId}:`, err.message);
     }
-  });
+  }
+
+  if (imagePath && imagePath.startsWith('/uploads/')) {
+    const filename = path.basename(imagePath);
+    const fullPath = path.join(UPLOAD_DIR, filename);
+    if (fullPath.startsWith(UPLOAD_DIR) && fs.existsSync(fullPath)) {
+      fs.unlink(fullPath, (err) => {
+        if (err && err.code !== 'ENOENT') {
+          console.error(`[Upload] Failed to delete old local file: ${fullPath}`, err.message);
+        }
+      });
+    }
+  }
 }
 
 module.exports = {
   handleUploadError,
+  processImageUpload,
   deleteOldUpload,
   UPLOAD_DIR,
   ALLOWED_TYPES,

@@ -210,10 +210,39 @@ Open your browser and visit **`http://localhost:3000`**.
 
 ---
 
+## ☁️ Production Deployment Guide
+
+### 1. Production Environment Variables
+Set the following on your hosting provider (Render, Railway, DigitalOcean, AWS):
+```env
+PORT=3000
+NODE_ENV=production
+MONGODB_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net/ayush_personal_blog?retryWrites=true&w=majority
+SESSION_SECRET=<generate_a_random_64_character_hex_string>
+ADMIN_EMAIL=your-real-email@example.com
+ADMIN_PASSWORD=your-secure-strong-password
+ADMIN_NAME="Ayush Jha"
+SITE_URL=https://yourdomain.com
+```
+
+### 2. Persistent Upload Storage
+Uploaded cover images and profile pictures are written to `public/uploads/`.
+- **Render / Railway / Fly.io**: Attach a **Persistent Disk** mounted at `public/uploads/`.
+- **Docker / VPS**: Bind mount a host volume: `-v /var/data/blog-uploads:/app/public/uploads`.
+- **Serverless / Ephemeral**: Connect cloud storage (e.g. AWS S3, Cloudinary) to replace local disk storage in `src/middleware/upload.js`.
+
+### 3. Health Checks
+The application exposes a lightweight health check endpoint for uptime monitors and load balancers:
+- **`GET /health`** returns `200 OK` with `{ status: "ok", uptime: <seconds>, database: "connected" }`.
+
+---
+
 ## 🧪 Running Automated Tests
 
 Run the full automated test suite (Jest + Supertest):
 ```bash
+node ./node_modules/jest/bin/jest.js --runInBand --detectOpenHandles
+# Or:
 npm test
 ```
-All 15 integration tests covering public endpoints, article reading, search filtering, contact form validation, authentication, and article authoring will execute.
+All 25 integration tests covering public endpoints, article reading, search filtering, contact form validation, authentication, and article authoring will execute.

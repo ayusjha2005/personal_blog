@@ -48,6 +48,10 @@ const profileSchema = new mongoose.Schema(
       type: String,
       default: '/images/profile.jpg',
     },
+    profileImagePublicId: {
+      type: String,
+      default: null,
+    },
     degree: {
       type: String,
       default: 'B.Tech CSE (CSBS) @ VIT-AP',

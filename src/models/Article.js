@@ -1,6 +1,16 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
 
+const commentSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true, trim: true, maxlength: 80 },
+    email: { type: String, trim: true, maxlength: 200, default: '' },
+    body: { type: String, required: true, trim: true, maxlength: 2000 },
+    approved: { type: Boolean, default: true },
+  },
+  { timestamps: true }
+);
+
 const articleSchema = new mongoose.Schema(
   {
     title: {
@@ -36,6 +46,10 @@ const articleSchema = new mongoose.Schema(
       type: String,
       default: '/images/hero-desktop.jpg',
     },
+    coverImagePublicId: {
+      type: String,
+      default: null,
+    },
     category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Category',
@@ -68,6 +82,11 @@ const articleSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    likes: {
+      type: Number,
+      default: 0,
+    },
+    comments: [commentSchema],
   },
   {
     timestamps: true,

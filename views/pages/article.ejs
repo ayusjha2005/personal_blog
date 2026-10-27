@@ -36,10 +36,22 @@
               </time>
               <span>&bull;</span>
               <span><%= article.readingTime || 5 %> min read</span>
+              <span>&bull;</span>
+              <span style="display:inline-flex;align-items:center;gap:0.3rem;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                <%= article.views || 0 %> views
+              </span>
             </div>
           </div>
 
           <div class="article-actions">
+            <!-- Like Button -->
+            <button class="icon-btn like-btn" id="like-btn" data-slug="<%= article.slug %>" type="button" aria-label="Like article" title="Like this article">
+              <svg class="heart-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+              </svg>
+              <span class="like-count" id="like-count"><%= article.likes || 0 %></span>
+            </button>
             <button class="icon-btn bookmark-btn" data-slug="<%= article.slug %>" type="button" aria-label="Bookmark article" title="Bookmark">
               <svg class="bookmark-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
@@ -138,13 +150,286 @@
           <% } %>
         </nav>
       <% } %>
+
+      <!-- ===== COMMENTS SECTION ===== -->
+      <section class="comments-section" id="comments">
+        <div class="comments-header">
+          <h2 class="comments-title">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+            Comments (<%= comments.length %>)
+          </h2>
+        </div>
+
+        <!-- Comment Form -->
+        <div class="comment-form-card">
+          <h3 class="comment-form-title">Leave a Comment</h3>
+          <form action="/blog/<%= article.slug %>/comment" method="POST" class="comment-form" id="comment-form">
+            <div class="comment-form-row">
+              <div class="form-group">
+                <label for="comment-name">Name <span class="required">*</span></label>
+                <input type="text" id="comment-name" name="name" placeholder="Your name" required maxlength="80" autocomplete="name">
+              </div>
+              <div class="form-group">
+                <label for="comment-email">Email <span class="optional">(optional, not shown)</span></label>
+                <input type="email" id="comment-email" name="email" placeholder="you@example.com" maxlength="200" autocomplete="email">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="comment-body">Comment <span class="required">*</span></label>
+              <textarea id="comment-body" name="body" rows="4" placeholder="Share your thoughts..." required maxlength="2000"></textarea>
+              <div class="char-counter"><span id="char-count">0</span>/2000</div>
+            </div>
+            <button type="submit" class="comment-submit-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+              Post Comment
+            </button>
+          </form>
+        </div>
+
+        <!-- Comments List -->
+        <% if (comments.length > 0) { %>
+          <div class="comments-list">
+            <% comments.forEach(function(comment, i) { %>
+              <div class="comment-item" style="animation-delay: <%= i * 0.05 %>s">
+                <div class="comment-avatar">
+                  <span><%= comment.name.charAt(0).toUpperCase() %></span>
+                </div>
+                <div class="comment-content">
+                  <div class="comment-meta">
+                    <span class="comment-author"><%= comment.name %></span>
+                    <time class="comment-date"><%= formatDate(comment.createdAt) %></time>
+                  </div>
+                  <p class="comment-body"><%= comment.body %></p>
+                </div>
+              </div>
+            <% }); %>
+          </div>
+        <% } else { %>
+          <div class="no-comments">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+            <p>No comments yet. Be the first to share your thoughts!</p>
+          </div>
+        <% } %>
+      </section>
+
     </div>
   </main>
 
   <%- include('../partials/footer') %>
 
+  <style>
+    /* ===== LIKE BUTTON ===== */
+    .like-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.45rem 0.85rem;
+      border-radius: 2rem;
+      border: 1.5px solid var(--border-color);
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .like-btn:hover { border-color: #ef4444; color: #ef4444; background: #fef2f2; }
+    .like-btn.liked { border-color: #ef4444; color: #ef4444; background: #fef2f2; }
+    .like-btn.liked .heart-icon { fill: #ef4444; }
+    .like-btn .heart-icon { transition: fill 0.2s ease, transform 0.2s ease; }
+    .like-btn:active .heart-icon { transform: scale(1.3); }
+    .like-count { font-variant-numeric: tabular-nums; }
+
+    /* ===== COMMENTS SECTION ===== */
+    .comments-section {
+      margin-top: 4rem;
+      padding-top: 3rem;
+      border-top: 1px solid var(--border-color);
+    }
+    .comments-header { margin-bottom: 2rem; }
+    .comments-title {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    /* Comment form card */
+    .comment-form-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 1rem;
+      padding: 2rem;
+      margin-bottom: 2.5rem;
+    }
+    .comment-form-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 1.25rem;
+    }
+    .comment-form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    @media (max-width: 600px) { .comment-form-row { grid-template-columns: 1fr; } }
+    .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+    .form-group label {
+      font-size: 0.825rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+    .form-group .required { color: #ef4444; }
+    .form-group .optional { font-weight: 400; color: var(--text-muted); font-size: 0.78rem; }
+    .form-group input,
+    .form-group textarea {
+      padding: 0.7rem 0.9rem;
+      border-radius: 0.6rem;
+      border: 1.5px solid var(--border-color);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-size: 0.9rem;
+      font-family: inherit;
+      transition: border-color 0.2s ease;
+      outline: none;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus { border-color: var(--accent-primary); }
+    .form-group textarea { resize: vertical; min-height: 110px; }
+    .char-counter {
+      text-align: right;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+    .comment-submit-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.6rem;
+      background: var(--accent-primary);
+      color: var(--text-inverse);
+      border: 1px solid var(--accent-primary);
+      border-radius: 2rem;
+      font-size: 0.9rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: opacity 0.2s ease, transform 0.1s ease;
+      margin-top: 1rem;
+    }
+    .comment-submit-btn svg {
+      stroke: var(--text-inverse);
+    }
+    .comment-submit-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .comment-submit-btn:active { transform: scale(0.97); }
+
+    /* Comments list */
+    .comments-list { display: flex; flex-direction: column; gap: 1.25rem; }
+    .comment-item {
+      display: flex;
+      gap: 1rem;
+      animation: fadeUp 0.4s ease both;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .comment-avatar {
+      flex-shrink: 0;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary, #7c3aed));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 1rem;
+    }
+    .comment-content {
+      flex: 1;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 0.75rem;
+      padding: 1rem 1.25rem;
+    }
+    .comment-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+    .comment-author { font-weight: 700; font-size: 0.9rem; color: var(--text-primary); }
+    .comment-date { font-size: 0.78rem; color: var(--text-muted); }
+    .comment-body {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.65;
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    /* No comments state */
+    .no-comments {
+      text-align: center;
+      padding: 3rem;
+      color: var(--text-muted);
+      border: 2px dashed var(--border-color);
+      border-radius: 1rem;
+    }
+    .no-comments svg { margin-bottom: 1rem; opacity: 0.5; }
+    .no-comments p { font-size: 0.95rem; }
+  </style>
+
   <script src="/js/theme.js"></script>
   <script src="/js/main.js"></script>
   <script src="/js/article.js"></script>
+  <script>
+    // Like button
+    const likeBtn = document.getElementById('like-btn');
+    const likeCount = document.getElementById('like-count');
+    const LIKED_KEY = 'liked_' + '<%= article.slug %>';
+
+    if (localStorage.getItem(LIKED_KEY)) {
+      likeBtn.classList.add('liked');
+    }
+
+    likeBtn.addEventListener('click', async function() {
+      if (likeBtn.classList.contains('liked')) return; // prevent double-like
+      try {
+        const res = await fetch('/blog/<%= article.slug %>/like', { method: 'POST' });
+        if (res.ok) {
+          const data = await res.json();
+          likeCount.textContent = data.likes;
+          likeBtn.classList.add('liked');
+          localStorage.setItem(LIKED_KEY, '1');
+          likeBtn.querySelector('.heart-icon').setAttribute('fill', '#ef4444');
+        }
+      } catch (e) { console.error(e); }
+    });
+
+    // Character counter
+    const textarea = document.getElementById('comment-body');
+    const charCount = document.getElementById('char-count');
+    if (textarea && charCount) {
+      textarea.addEventListener('input', function() {
+        charCount.textContent = textarea.value.length;
+        charCount.style.color = textarea.value.length > 1900 ? '#ef4444' : '';
+      });
+    }
+
+    // Smooth scroll to comments if URL has #comments
+    if (window.location.hash === '#comments') {
+      const el = document.getElementById('comments');
+      if (el) setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+    }
+  </script>
 </body>
 </html>

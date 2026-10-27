@@ -33,7 +33,32 @@ const loginLimiter = rateLimit({
   },
 });
 
+// Rate limiter for article comments (10 comments per 15 minutes per IP)
+const commentLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
+    const slug = req.params.slug || '';
+    res.status(429).send('Too many comments submitted from this IP. Please wait a few minutes before trying again.');
+  },
+});
+
+// Rate limiter for article likes (30 likes per 5 minutes per IP)
+const likeLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
+    res.status(429).json({ error: 'Too many like requests from this IP. Please slow down.' });
+  },
+});
+
 module.exports = {
   contactLimiter,
   loginLimiter,
+  commentLimiter,
+  likeLimiter,
 };

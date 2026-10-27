@@ -19,17 +19,17 @@
             </p>
             <div class="hero-cta-group">
               <% if (featuredArticle) { %>
-                <a href="/blog/<%= featuredArticle.slug %>" class="btn-pill-primary">
+                <a href="/blog/<%= featuredArticle.slug %>" class="btn-pill-primary hero-btn-primary" style="background-color: #FFFFFF !important; color: #0E1010 !important; border-color: #FFFFFF !important; font-weight: 700;">
                   <span>Read Latest Post</span>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E1010" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="5" y1="12" x2="19" y2="12"></line>
                     <polyline points="12 5 19 12 12 19"></polyline>
                   </svg>
                 </a>
               <% } else { %>
-                <a href="/blog" class="btn-pill-primary">Explore Articles</a>
+                <a href="/blog" class="btn-pill-primary hero-btn-primary" style="background-color: #FFFFFF !important; color: #0E1010 !important; border-color: #FFFFFF !important; font-weight: 700;">Explore Articles</a>
               <% } %>
-              <a href="/about" class="btn-pill-outline">About Me</a>
+              <a href="/about" class="btn-pill-outline hero-btn-outline" style="color: #FFFFFF !important; border-color: rgba(255, 255, 255, 0.6) !important; background-color: rgba(255, 255, 255, 0.12) !important; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); font-weight: 600;">About Me</a>
             </div>
           </div>
 

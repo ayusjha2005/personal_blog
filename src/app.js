@@ -53,7 +53,15 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, '../public'), { maxAge: '1d' }));
 
 // Session configuration
+if (process.env.NODE_ENV === 'production') {
+  if (!process.env.SESSION_SECRET || process.env.SESSION_SECRET.includes('dev')) {
+    console.error('[FATAL CONFIG ERROR] Strong SESSION_SECRET environment variable is required in production.');
+    process.exit(1);
+  }
+}
+
 const mongoURI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/ayush_personal_blog';
+const isAtlas = mongoURI.includes('+srv') || mongoURI.includes('mongodb.net');
 const sessionStore =
   process.env.NODE_ENV === 'test'
     ? new session.MemoryStore()
@@ -62,6 +70,8 @@ const sessionStore =
         collectionName: 'sessions',
         ttl: 14 * 24 * 60 * 60, // 14 days
         autoRemove: 'native',
+        // Workaround: Node.js v24 (OpenSSL 3.x) TLS compat for Atlas
+        ...(isAtlas && { mongoOptions: { tls: true, minDHSize: 1024 } }),
       });
 
 app.use(
@@ -70,6 +80,7 @@ app.use(
     resave: false,
     saveUninitialized: false,
     store: sessionStore,
+    proxy: true, // Crucial for reverse proxies / Heroku / Render / Cloudflare
     cookie: {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -102,7 +113,7 @@ app.use(async (req, res, next) => {
         linkedin: 'https://linkedin.com/in/ayushjha',
         twitter: 'https://x.com/ayushjha',
         instagram: 'https://instagram.com/ayushjha',
-        email: 'ayushjha@gmail.com',
+        email: 'reach2kr.ayush@gmail.com',
       },
     };
 

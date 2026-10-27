@@ -293,6 +293,34 @@ button, input, textarea, select {
   flex-wrap: wrap;
 }
 
+.hero-cta-group .btn-pill-primary {
+  background-color: #FFFFFF;
+  color: #0E1010;
+  border-color: #FFFFFF;
+  font-weight: 700;
+}
+
+.hero-cta-group .btn-pill-primary:hover {
+  background-color: #F3F4F6;
+  border-color: #F3F4F6;
+  opacity: 1;
+}
+
+.hero-cta-group .btn-pill-outline {
+  color: #FFFFFF;
+  border-color: rgba(255, 255, 255, 0.45);
+  background-color: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  font-weight: 600;
+}
+
+.hero-cta-group .btn-pill-outline:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-color: #FFFFFF;
+  color: #FFFFFF;
+}
+
 .hero-script-phrase {
   position: absolute;
   right: 4.5rem;
