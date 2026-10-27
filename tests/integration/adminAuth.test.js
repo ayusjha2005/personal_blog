@@ -5,12 +5,12 @@ const mongoose = require('mongoose');
 const app = require('../../src/app');
 const User = require('../../src/models/User');
 const Article = require('../../src/models/Article');
-const Category = require('../../src/models/Category');
+const { CATEGORIES } = require('../../src/config/categories');
 const Profile = require('../../src/models/Profile');
 const ContactMessage = require('../../src/models/ContactMessage');
 
 let agent;
-let testCategory;
+let testCategoryName;
 let createdArticleId;
 let uploadedFilesToCleanup = [];
 
@@ -33,7 +33,7 @@ beforeAll(async () => {
     await admin.save();
   }
 
-  testCategory = await Category.findOne();
+  testCategoryName = CATEGORIES[0].name;
 
   // Create test contact message
   await ContactMessage.create({
@@ -108,7 +108,7 @@ describe('Single-Owner Administration Workflows', () => {
       subtitle: 'Testing full lifecycle',
       excerpt: 'Short excerpt for lifecycle test article.',
       content: '## Section\n\nFull lifecycle test content.',
-      category: testCategory._id.toString(),
+      category: testCategoryName,
       status: 'draft',
       coverImage: '/images/article-productivity.jpg',
       tags: 'Lifecycle, Test',
@@ -128,7 +128,7 @@ describe('Single-Owner Administration Workflows', () => {
       subtitle: 'Updated subtitle',
       excerpt: 'Updated excerpt text.',
       content: '## Updated Section\n\nUpdated article body.',
-      category: testCategory._id.toString(),
+      category: testCategoryName,
       status: 'draft',
       coverImage: '/images/article-productivity.jpg',
       tags: 'Lifecycle, Updated',
@@ -181,7 +181,7 @@ describe('Single-Owner Administration Workflows', () => {
       .field('subtitle', 'Testing file upload')
       .field('excerpt', 'Article with uploaded cover image.')
       .field('content', '## Section\n\nUploaded cover image content test.')
-      .field('category', testCategory._id.toString())
+      .field('category', testCategoryName)
       .field('status', 'draft')
       .field('tags', 'Upload, Test')
       .attach('coverImage', fakeImageBuffer, {
@@ -213,7 +213,7 @@ describe('Single-Owner Administration Workflows', () => {
       .field('subtitle', 'Testing validation error')
       .field('excerpt', 'This should fail validation.')
       .field('content', 'Content text.')
-      .field('category', testCategory._id.toString())
+      .field('category', testCategoryName)
       .field('status', 'draft')
       .attach('coverImage', textBuffer, {
         filename: 'document.txt',

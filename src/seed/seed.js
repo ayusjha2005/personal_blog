@@ -145,6 +145,8 @@ async function seedData() {
       categoryMap[cat.slug] = existingCat._id;
     }
 
+const { CATEGORIES } = require('../config/categories');
+
     // 4. Seed Articles
     const articlesCount = await Article.countDocuments();
     if (articlesCount === 0) {
@@ -156,7 +158,7 @@ async function seedData() {
             'A complete guide to tools, extensions, and workflows that help me stay focused and write better code.',
           excerpt:
             'A complete guide to tools, extensions, and workflows that help me stay focused and write better code.',
-          category: categoryMap['web-development'],
+          category: 'Web Development',
           tags: ['Development', 'Tools', 'Productivity', 'VSCode'],
           isFeatured: true,
           status: 'published',
@@ -230,7 +232,7 @@ Building software is a marathon. Take care of your ergonomics, keep your tooling
             'Key lessons I learned while building my first complete MERN application.',
           excerpt:
             'Key lessons I learned while building my first complete MERN application.',
-          category: categoryMap['web-development'],
+          category: 'Web Development',
           tags: ['Backend', 'FullStack', 'MongoDB', 'Node.js'],
           isFeatured: false,
           status: 'published',
@@ -277,7 +279,7 @@ const getArticle = async (req, res, next) => {
             'My experience, challenges and why it improved my workflow.',
           excerpt:
             'My experience, challenges and why it improved my workflow.',
-          category: categoryMap['linux'],
+          category: 'Personal',
           tags: ['Linux', 'Productivity', 'OpenSource'],
           isFeatured: false,
           status: 'published',
@@ -307,7 +309,7 @@ If you're hesitating, start with dual-boot or WSL2. Once you experience terminal
             'A structured plan for learning backend development and landing an internship.',
           excerpt:
             'A structured plan for learning backend development and landing an internship.',
-          category: categoryMap['career'],
+          category: 'Personal',
           tags: ['Career', 'Backend', 'Roadmap', 'Learning'],
           isFeatured: false,
           status: 'published',
@@ -337,7 +339,7 @@ Deploy projects to Linux VPS or PaaS, write automated integration tests with Jes
             'Tools, habits and practical tips that actually work for me.',
           excerpt:
             'Tools, habits and practical tips that actually work for me.',
-          category: categoryMap['college-life'],
+          category: 'College Life',
           tags: ['College Life', 'Productivity', 'Habits'],
           isFeatured: false,
           status: 'published',
@@ -364,7 +366,7 @@ I divide my day into dedicated context windows. Rather than context-switching ev
             'How I practice, the resources I use, and what has worked for me so far.',
           excerpt:
             'How I practice, the resources I use, and what has worked for me so far.',
-          category: categoryMap['dsa'],
+          category: 'DSA & Algorithms',
           tags: ['DSA', 'Algorithms', 'ProblemSolving'],
           isFeatured: false,
           status: 'published',

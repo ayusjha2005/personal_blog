@@ -2,7 +2,7 @@ const request = require('supertest');
 const mongoose = require('mongoose');
 const app = require('../../src/app');
 const Article = require('../../src/models/Article');
-const Category = require('../../src/models/Category');
+const { CATEGORIES } = require('../../src/config/categories');
 
 let draftArticle;
 
@@ -12,7 +12,6 @@ beforeAll(async () => {
     await mongoose.connect(mongoURI);
   }
 
-  const category = await Category.findOne();
   // Create a draft article for draft-protection tests
   draftArticle = await Article.findOneAndUpdate(
     { slug: 'top-secret-private-draft-post' },
@@ -22,8 +21,24 @@ beforeAll(async () => {
       excerpt: 'This draft should never be visible publicly.',
       content: '## Draft Content\n\nSecret unreleased notes.',
       status: 'draft',
-      category: category._id,
+      category: CATEGORIES[0].name,
       publishedAt: null,
+    },
+    { upsert: true, new: true }
+  );
+
+  // Ensure published article exists for detail page test
+  await Article.findOneAndUpdate(
+    { slug: 'how-i-set-up-my-developer-environment-for-maximum-productivity' },
+    {
+      title: 'How I Set Up My Developer Environment for Maximum Productivity',
+      slug: 'how-i-set-up-my-developer-environment-for-maximum-productivity',
+      subtitle: 'A complete guide to tools, extensions, and workflows that help me stay focused and write better code.',
+      excerpt: 'A complete guide to tools, extensions, and workflows that help me stay focused and write better code.',
+      content: '## 1. Why Your Environment Matters\n\nErgonomic, distraction-free environment ensures maximum productivity.',
+      category: CATEGORIES[0].name,
+      status: 'published',
+      publishedAt: new Date(),
     },
     { upsert: true, new: true }
   );

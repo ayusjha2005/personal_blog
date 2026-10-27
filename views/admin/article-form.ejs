@@ -22,53 +22,8 @@
   <link rel="stylesheet" href="/css/admin.css?v=3">
 
   <style>
-    /* Critical Admin Layout Shell - Immune to caching */
+    /* Base layout defaults handled cleanly by admin.css */
     html, body.admin-layout { height: 100%; min-height: 100vh; margin: 0; padding: 0; }
-    body.admin-layout {
-      display: flex !important;
-      flex-direction: row !important;
-      align-items: stretch !important;
-      min-height: 100vh !important;
-      background-color: var(--bg-primary);
-      overflow-x: hidden;
-      width: 100%;
-    }
-    .admin-sidebar {
-      width: 260px !important;
-      min-width: 260px !important;
-      max-width: 260px !important;
-      height: 100vh !important;
-      position: sticky !important;
-      top: 0 !important;
-      left: 0 !important;
-      flex-shrink: 0 !important;
-      overflow-y: auto;
-      z-index: 50;
-    }
-    .admin-main {
-      flex: 1 1 0% !important;
-      min-width: 0 !important;
-      width: calc(100% - 260px) !important;
-      min-height: 100vh !important;
-      display: flex !important;
-      flex-direction: column !important;
-    }
-    .admin-topbar {
-      height: 4.25rem !important;
-      min-height: 4.25rem !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: space-between !important;
-      padding: 0 2rem !important;
-      position: sticky;
-      top: 0;
-      z-index: 40;
-    }
-    .admin-content {
-      padding: 2rem !important;
-      flex: 1 0 auto !important;
-      min-width: 0 !important;
-    }
 
     /* Immediate inlined styles for robust image upload UI */
     .image-upload-wrapper { width: 100%; position: relative; }
@@ -270,10 +225,19 @@
 
   <div class="admin-main">
     <header class="admin-topbar">
-      <h1 style="font-size: 1.25rem; font-weight: 700;">
-        <%= isEdit ? 'Edit Article' : 'Create New Article' %>
-      </h1>
-      <div style="display: flex; gap: 0.75rem;">
+      <div class="admin-topbar-left">
+        <button type="button" class="admin-menu-btn" aria-label="Open navigation menu">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+        <h1 style="font-size: 1.25rem; font-weight: 700; margin: 0;">
+          <%= isEdit ? 'Edit Article' : 'Create New Article' %>
+        </h1>
+      </div>
+      <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
         <a href="/admin/articles" class="btn-pill-outline">Cancel</a>
         <button type="submit" form="article-form" class="btn-pill-primary">
           <%= isEdit ? 'Save Changes' : 'Create Article' %>
@@ -342,8 +306,8 @@
               <select id="category" name="category" class="category-dropdown-select" style="width: 100%;" required>
                 <% categories.forEach(function(cat) { %>
                   <option 
-                    value="<%= cat._id %>" 
-                    <%= (article.category && (article.category._id ? article.category._id.toString() : article.category.toString()) === cat._id.toString()) ? 'selected' : '' %>
+                    value="<%= cat.name %>" 
+                    <%= (article.category && article.category === cat.name) ? 'selected' : '' %>
                   >
                     <%= cat.name %>
                   </option>

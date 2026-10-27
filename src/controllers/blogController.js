@@ -1,5 +1,5 @@
 const articleService = require('../services/articleService');
-const Category = require('../models/Category');
+const { CATEGORIES } = require('../config/categories');
 const Article = require('../models/Article');
 const { renderMarkdown, extractHeadings } = require('../utils/markdown');
 
@@ -10,10 +10,7 @@ async function getBlogListing(req, res, next) {
     const search = req.query.q || req.query.search || null;
     const sort = req.query.sort || 'newest';
 
-    const [categories, result] = await Promise.all([
-      Category.find().sort({ order: 1, name: 1 }).lean(),
-      articleService.getArticles({ page, limit: 6, category, search, sort }),
-    ]);
+    const result = await articleService.getArticles({ page, limit: 6, category, search, sort });
 
     res.render('pages/blog', {
       title: 'All Articles | Ayush Jha',
@@ -22,7 +19,7 @@ async function getBlogListing(req, res, next) {
       currentPage: result.currentPage,
       totalPages: result.totalPages,
       totalArticles: result.totalArticles,
-      categories,
+      categories: CATEGORIES,
       currentCategory: category,
       searchQuery: search,
       sortOrder: sort,
@@ -44,9 +41,9 @@ async function getArticleDetail(req, res, next) {
         { slug, status: 'published' },
         { $inc: { views: 1 } },
         { new: true }
-      ).populate('category');
+      );
     } else {
-      article = await Article.findOne({ slug }).populate('category');
+      article = await Article.findOne({ slug });
     }
 
     if (!article) {

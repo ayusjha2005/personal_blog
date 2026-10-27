@@ -1,5 +1,5 @@
 const User = require('../models/User');
-const Category = require('../models/Category');
+const { CATEGORIES, CATEGORY_NAMES } = require('../config/categories');
 const Article = require('../models/Article');
 const Profile = require('../models/Profile');
 const SiteSettings = require('../models/SiteSettings');
@@ -90,7 +90,7 @@ async function getDashboard(req, res, next) {
   try {
     const [stats, recentArticles, recentMessages, unreadCount] = await Promise.all([
       articleService.getStats(),
-      Article.find().sort({ createdAt: -1 }).limit(5).populate('category').lean(),
+      Article.find().sort({ createdAt: -1 }).limit(5).lean(),
       ContactMessage.find().sort({ createdAt: -1 }).limit(5).lean(),
       contactService.getUnreadCount(),
     ]);
@@ -141,16 +141,13 @@ async function getArticles(req, res, next) {
 // New Article Form
 async function getNewArticle(req, res, next) {
   try {
-    const [categories, unreadCount] = await Promise.all([
-      Category.find().sort({ order: 1, name: 1 }).lean(),
-      contactService.getUnreadCount(),
-    ]);
+    const unreadCount = await contactService.getUnreadCount();
 
     res.render('admin/article-form', {
       title: 'Create New Article | Admin',
       activeAdmin: 'articles',
       article: {},
-      categories,
+      categories: CATEGORIES,
       unreadCount,
       isEdit: false,
       error: null,
@@ -165,7 +162,6 @@ async function getNewArticle(req, res, next) {
 async function postNewArticle(req, res, next) {
   try {
     const { title, slug, subtitle, excerpt, content, category, tags, status, isFeatured } = req.body;
-    const categories = await Category.find().sort({ order: 1, name: 1 }).lean();
     const unreadCount = await contactService.getUnreadCount();
 
     // Handle upload errors from middleware
@@ -174,7 +170,7 @@ async function postNewArticle(req, res, next) {
         title: 'Create New Article | Admin',
         activeAdmin: 'articles',
         article: req.body,
-        categories,
+        categories: CATEGORIES,
         unreadCount,
         isEdit: false,
         error: req.uploadError,
@@ -190,10 +186,23 @@ async function postNewArticle(req, res, next) {
         title: 'Create New Article | Admin',
         activeAdmin: 'articles',
         article: req.body,
-        categories,
+        categories: CATEGORIES,
         unreadCount,
         isEdit: false,
         error: `An article with slug "${generatedSlug}" already exists. Please choose a unique slug.`,
+        layout: false,
+      });
+    }
+
+    if (!category || !CATEGORY_NAMES.includes(category)) {
+      return res.status(400).render('admin/article-form', {
+        title: 'Create New Article | Admin',
+        activeAdmin: 'articles',
+        article: req.body,
+        categories: CATEGORIES,
+        unreadCount,
+        isEdit: false,
+        error: 'Please select a valid category from the list.',
         layout: false,
       });
     }
@@ -250,9 +259,8 @@ async function postNewArticle(req, res, next) {
 async function getEditArticle(req, res, next) {
   try {
     const { id } = req.params;
-    const [article, categories, unreadCount] = await Promise.all([
+    const [article, unreadCount] = await Promise.all([
       Article.findById(id).lean(),
-      Category.find().sort({ order: 1, name: 1 }).lean(),
       contactService.getUnreadCount(),
     ]);
 
@@ -264,7 +272,7 @@ async function getEditArticle(req, res, next) {
       title: `Edit: ${article.title} | Admin`,
       activeAdmin: 'articles',
       article,
-      categories,
+      categories: CATEGORIES,
       unreadCount,
       isEdit: true,
       error: null,
@@ -280,7 +288,6 @@ async function postEditArticle(req, res, next) {
   try {
     const { id } = req.params;
     const { title, slug, subtitle, excerpt, content, category, tags, status, isFeatured } = req.body;
-    const categories = await Category.find().sort({ order: 1, name: 1 }).lean();
     const unreadCount = await contactService.getUnreadCount();
 
     // Handle upload errors from middleware
@@ -290,7 +297,7 @@ async function postEditArticle(req, res, next) {
         title: `Edit Article | Admin`,
         activeAdmin: 'articles',
         article: { ...req.body, _id: id, coverImage: articleData ? articleData.coverImage : '' },
-        categories,
+        categories: CATEGORIES,
         unreadCount,
         isEdit: true,
         error: req.uploadError,
@@ -305,10 +312,23 @@ async function postEditArticle(req, res, next) {
         title: `Edit Article | Admin`,
         activeAdmin: 'articles',
         article: { ...req.body, _id: id },
-        categories,
+        categories: CATEGORIES,
         unreadCount,
         isEdit: true,
         error: `An article with slug "${generatedSlug}" already exists.`,
+        layout: false,
+      });
+    }
+
+    if (!category || !CATEGORY_NAMES.includes(category)) {
+      return res.status(400).render('admin/article-form', {
+        title: 'Edit Article | Admin',
+        activeAdmin: 'articles',
+        article: { ...req.body, _id: id },
+        categories: CATEGORIES,
+        unreadCount,
+        isEdit: true,
+        error: 'Please select a valid category from the list.',
         layout: false,
       });
     }

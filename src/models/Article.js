@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
+const { CATEGORY_NAMES } = require('../config/categories');
 
 const commentSchema = new mongoose.Schema(
   {
@@ -51,9 +52,10 @@ const articleSchema = new mongoose.Schema(
       default: null,
     },
     category: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Category',
+      type: String,
       required: [true, 'Category is required'],
+      enum: { values: CATEGORY_NAMES, message: '"{VALUE}" is not a valid category' },
+      trim: true,
     },
     tags: [
       {

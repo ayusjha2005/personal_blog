@@ -1,13 +1,11 @@
-const Category = require('../models/Category');
+const { CATEGORIES } = require('../config/categories');
 
 async function getAboutPage(req, res, next) {
   try {
-    const categories = await Category.find().sort({ order: 1, name: 1 }).lean();
-
     res.render('pages/about', {
       title: 'About | Ayush Jha',
       activePage: 'about',
-      categories,
+      categories: CATEGORIES,
     });
   } catch (error) {
     next(error);

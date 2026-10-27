@@ -1,18 +1,26 @@
-<aside class="admin-sidebar">
+<aside class="admin-sidebar" id="adminSidebar">
   <div class="admin-brand">
     <a href="/admin" style="font-weight: 700; color: var(--text-primary); text-decoration: none;">
       Ayush Jha <span style="font-size: 0.75rem; background: var(--bg-tag); padding: 0.2rem 0.4rem; border-radius: 4px; margin-left: 0.35rem;">Admin</span>
     </a>
-    <button class="icon-btn theme-toggle-btn" aria-label="Toggle theme">
-      <svg class="moon-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-      </svg>
-      <svg class="sun-icon" style="display: none;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="12" cy="12" r="5"></circle>
-        <line x1="12" y1="1" x2="12" y2="3"></line>
-        <line x1="12" y1="21" x2="12" y2="23"></line>
-      </svg>
-    </button>
+    <div style="display: flex; align-items: center; gap: 0.25rem;">
+      <button class="icon-btn theme-toggle-btn" aria-label="Toggle theme">
+        <svg class="moon-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+        <svg class="sun-icon" style="display: none;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+        </svg>
+      </button>
+      <button class="icon-btn admin-sidebar-close" id="adminSidebarClose" aria-label="Close admin menu" type="button">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
   </div>
 
   <ul class="admin-nav">
@@ -100,3 +108,56 @@
     </a>
   </div>
 </aside>
+
+<div class="admin-sidebar-overlay" id="adminSidebarOverlay" aria-hidden="true"></div>
+
+<script>
+  (function() {
+    function initAdminMobileNav() {
+      const sidebar = document.getElementById('adminSidebar');
+      const overlay = document.getElementById('adminSidebarOverlay');
+      const closeBtn = document.getElementById('adminSidebarClose');
+      const menuBtns = document.querySelectorAll('.admin-menu-btn');
+
+      function openSidebar() {
+        if (sidebar) sidebar.classList.add('open');
+        if (overlay) overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        menuBtns.forEach(btn => btn.setAttribute('aria-expanded', 'true'));
+      }
+
+      function closeSidebar() {
+        if (sidebar) sidebar.classList.remove('open');
+        if (overlay) overlay.classList.remove('active');
+        document.body.style.overflow = '';
+        menuBtns.forEach(btn => btn.setAttribute('aria-expanded', 'false'));
+      }
+
+      menuBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (sidebar && sidebar.classList.contains('open')) {
+            closeSidebar();
+          } else {
+            openSidebar();
+          }
+        });
+      });
+
+      if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+      if (overlay) overlay.addEventListener('click', closeSidebar);
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && sidebar && sidebar.classList.contains('open')) {
+          closeSidebar();
+        }
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initAdminMobileNav);
+    } else {
+      initAdminMobileNav();
+    }
+  })();
+</script>

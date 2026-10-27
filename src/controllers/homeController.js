@@ -1,12 +1,11 @@
 const articleService = require('../services/articleService');
-const Category = require('../models/Category');
+const { CATEGORIES } = require('../config/categories');
 
 async function getHomePage(req, res, next) {
   try {
-    const [featuredArticle, latestArticles, categories] = await Promise.all([
+    const [featuredArticle, latestArticles] = await Promise.all([
       articleService.getFeaturedArticle(),
       articleService.getLatestArticles(3),
-      Category.find().sort({ order: 1, name: 1 }).lean(),
     ]);
 
     res.render('pages/home', {
@@ -14,7 +13,7 @@ async function getHomePage(req, res, next) {
       activePage: 'home',
       featuredArticle,
       latestArticles,
-      categories,
+      categories: CATEGORIES,
     });
   } catch (error) {
     next(error);

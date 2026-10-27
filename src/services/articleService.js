@@ -1,16 +1,14 @@
 const Article = require('../models/Article');
-const Category = require('../models/Category');
+const { SLUG_TO_NAME } = require('../config/categories');
 
 class ArticleService {
   async getFeaturedArticle() {
     let featured = await Article.findOne({ isFeatured: true, status: 'published' })
-      .populate('category')
       .lean();
 
     if (!featured) {
       featured = await Article.findOne({ status: 'published' })
         .sort({ publishedAt: -1, createdAt: -1 })
-        .populate('category')
         .lean();
     }
     return featured;
@@ -24,7 +22,6 @@ class ArticleService {
     return Article.find(query)
       .sort({ publishedAt: -1, createdAt: -1 })
       .limit(limit)
-      .populate('category')
       .lean();
   }
 
@@ -33,9 +30,9 @@ class ArticleService {
 
     // Filter by Category slug if provided
     if (category && category !== 'all') {
-      const catDoc = await Category.findOne({ slug: category.toLowerCase() });
-      if (catDoc) {
-        query.category = catDoc._id;
+      const catName = SLUG_TO_NAME[category.toLowerCase()];
+      if (catName) {
+        query.category = catName;
       } else {
         // If non-existent category queried, return empty
         return { articles: [], totalArticles: 0, totalPages: 0, currentPage: page };
@@ -64,7 +61,6 @@ class ArticleService {
       .sort(sortCriteria)
       .skip(skip)
       .limit(limit)
-      .populate('category')
       .lean();
 
     return {
@@ -80,7 +76,7 @@ class ArticleService {
     if (!isAdmin) {
       query.status = 'published';
     }
-    return Article.findOne(query).populate('category');
+    return Article.findOne(query);
   }
 
   async getRelatedArticles(currentArticle, limit = 3) {
@@ -88,13 +84,12 @@ class ArticleService {
       _id: { $ne: currentArticle._id },
       status: 'published',
       $or: [
-        { category: currentArticle.category._id || currentArticle.category },
+        { category: currentArticle.category },
         { tags: { $in: currentArticle.tags || [] } },
       ],
     })
       .sort({ publishedAt: -1 })
       .limit(limit)
-      .populate('category')
       .lean();
   }
 
@@ -136,7 +131,6 @@ class ArticleService {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
-      .populate('category')
       .lean();
 
     return {
