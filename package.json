@@ -43,5 +43,9 @@
     "jest": "^29.7.0",
     "supertest": "^7.1.1"
   },
-  "overrides": {}
+ "overrides": {
+  "sanitize-html": {
+    "htmlparser2": "8.0.2"
+  }
+}
 }
