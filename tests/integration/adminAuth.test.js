@@ -1,3 +1,5 @@
+const fs = require('fs');
+const path = require('path');
 const request = require('supertest');
 const mongoose = require('mongoose');
 const app = require('../../src/app');
@@ -10,6 +12,7 @@ const ContactMessage = require('../../src/models/ContactMessage');
 let agent;
 let testCategory;
 let createdArticleId;
+let uploadedFilesToCleanup = [];
 
 beforeAll(async () => {
   const mongoURI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/ayush_personal_blog';
@@ -46,8 +49,14 @@ afterAll(async () => {
   if (createdArticleId) {
     await Article.findByIdAndDelete(createdArticleId);
   }
-  await Article.deleteMany({ slug: 'lifecycle-article-test' });
+  await Article.deleteMany({ slug: { $in: ['lifecycle-article-test', 'upload-article-test'] } });
   await ContactMessage.deleteMany({ email: 'workflow@test.com' });
+  // Clean up any test uploaded files
+  for (const filePath of uploadedFilesToCleanup) {
+    if (fs.existsSync(filePath)) {
+      try { fs.unlinkSync(filePath); } catch (e) {}
+    }
+  }
   await mongoose.connection.close();
 });
 
@@ -151,6 +160,70 @@ describe('Single-Owner Administration Workflows', () => {
     createdArticleId = null;
   });
 
+  // Workflow 11E: Admin can create an article with an uploaded image file (multipart/form-data)
+  test('Workflow 11E: Admin can create an article with an attached cover image file', async () => {
+    const fakeImageBuffer = Buffer.from([
+      0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, // PNG signature
+      0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
+      0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+      0x08, 0x06, 0x00, 0x00, 0x00, 0x1f, 0x15, 0xc4,
+      0x89, 0x00, 0x00, 0x00, 0x0a, 0x49, 0x44, 0x41,
+      0x54, 0x78, 0x9c, 0x63, 0x00, 0x01, 0x00, 0x00,
+      0x05, 0x00, 0x01, 0x0d, 0x0a, 0x2d, 0xb4, 0x00,
+      0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae,
+      0x42, 0x60, 0x82,
+    ]);
+
+    const res = await agent
+      .post('/admin/articles/new')
+      .field('title', 'Upload Test Article')
+      .field('slug', 'upload-article-test')
+      .field('subtitle', 'Testing file upload')
+      .field('excerpt', 'Article with uploaded cover image.')
+      .field('content', '## Section\n\nUploaded cover image content test.')
+      .field('category', testCategory._id.toString())
+      .field('status', 'draft')
+      .field('tags', 'Upload, Test')
+      .attach('coverImage', fakeImageBuffer, {
+        filename: 'test-cover.png',
+        contentType: 'image/png',
+      });
+
+    expect(res.status).toBe(302);
+    const created = await Article.findOne({ slug: 'upload-article-test' });
+    expect(created).not.toBeNull();
+    expect(created.coverImage).toMatch(/^\/uploads\/\d+-[a-f0-9]+\.png$/);
+
+    const onDiskPath = path.join(__dirname, '../../public', created.coverImage);
+    expect(fs.existsSync(onDiskPath)).toBe(true);
+    uploadedFilesToCleanup.push(onDiskPath);
+
+    // Clean up created article
+    await Article.findByIdAndDelete(created._id);
+  });
+
+  // Workflow 11F: Admin article creation rejects unsupported file MIME types
+  test('Workflow 11F: Unsupported file MIME types are rejected with error', async () => {
+    const textBuffer = Buffer.from('This is a text file pretending to be an image');
+
+    const res = await agent
+      .post('/admin/articles/new')
+      .field('title', 'Invalid Upload Test')
+      .field('slug', 'invalid-upload-test')
+      .field('subtitle', 'Testing validation error')
+      .field('excerpt', 'This should fail validation.')
+      .field('content', 'Content text.')
+      .field('category', testCategory._id.toString())
+      .field('status', 'draft')
+      .attach('coverImage', textBuffer, {
+        filename: 'document.txt',
+        contentType: 'text/plain',
+      });
+
+    expect(res.status).toBe(400);
+    expect(res.text).toContain('Unsupported file type');
+  });
+
   // Workflow 12: Profile and social link updates persist
   test('Workflow 12: Admin can update profile information and social links', async () => {
     const res = await agent.post('/admin/profile').send({
@@ -182,6 +255,46 @@ describe('Single-Owner Administration Workflows', () => {
 
     const profile = await Profile.findOne();
     expect(profile.bio).toBe('Updated bio testing database persistence.');
+  });
+
+  // Workflow 12B: Admin can update profile photo with an attached file
+  test('Workflow 12B: Admin can update profile photo with an uploaded image file', async () => {
+    const fakeImageBuffer = Buffer.from([
+      0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+      0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
+      0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+      0x08, 0x06, 0x00, 0x00, 0x00, 0x1f, 0x15, 0xc4,
+      0x89, 0x00, 0x00, 0x00, 0x0a, 0x49, 0x44, 0x41,
+      0x54, 0x78, 0x9c, 0x63, 0x00, 0x01, 0x00, 0x00,
+      0x05, 0x00, 0x01, 0x0d, 0x0a, 0x2d, 0xb4, 0x00,
+      0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae,
+      0x42, 0x60, 0x82,
+    ]);
+
+    const res = await agent
+      .post('/admin/profile')
+      .field('name', 'Ayush Jha')
+      .field('heroHeadline', 'Ideas. Code. Progress.')
+      .field('bio', 'Updated bio with photo.')
+      .field('extendedBio', 'Extended bio with photo.')
+      .field('tagline', 'Learning in public, building in private.')
+      .attach('profileImage', fakeImageBuffer, {
+        filename: 'my-avatar.png',
+        contentType: 'image/png',
+      });
+
+    expect(res.status).toBe(200);
+    expect(res.text).toContain('Profile and site settings saved successfully');
+
+    const updatedProfile = await Profile.findOne();
+    expect(updatedProfile.profileImage).toMatch(/^\/uploads\/\d+-[a-f0-9]+\.png$/);
+
+    const onDiskPath = path.join(__dirname, '../../public', updatedProfile.profileImage);
+    expect(fs.existsSync(onDiskPath)).toBe(true);
+    uploadedFilesToCleanup.push(onDiskPath);
+
+    // Revert profile photo back to default so other tests stay clean
+    await Profile.updateOne({}, { profileImage: '/images/profile.jpg' });
   });
 
   // Workflow 13: Contact messages appear in the admin inbox

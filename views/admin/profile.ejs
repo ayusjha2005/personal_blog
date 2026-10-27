@@ -41,7 +41,7 @@
         <div class="alert alert-error" role="alert"><%= error %></div>
       <% } %>
 
-      <form id="profile-form" action="/admin/profile" method="POST">
+      <form id="profile-form" action="/admin/profile" method="POST" enctype="multipart/form-data">
         <!-- Identity & Hero -->
         <div class="data-card" style="padding: 2rem;">
           <h2 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-light);">
@@ -98,9 +98,62 @@
               <input type="text" id="contactScriptQuote" name="contactScriptQuote" class="form-input" value="<%= profile.contactScriptQuote || "Let's Build Something Amazing." %>">
             </div>
 
-            <div class="form-group">
-              <label for="profileImage" class="form-label">Profile Image Path</label>
-              <input type="text" id="profileImage" name="profileImage" class="form-input" value="<%= profile.profileImage || '/images/profile.jpg' %>">
+            <!-- Profile Photo Upload -->
+            <div class="form-group form-full">
+              <label class="form-label">Profile Photo</label>
+              <% const currentProfile = profile.profileImage || '/images/profile.jpg'; %>
+              <input type="hidden" name="existingProfileImage" value="<%= currentProfile %>">
+
+              <div class="image-upload-wrapper" id="profileUploadWrapper">
+                <div class="image-upload-area avatar-upload-area <%= currentProfile ? 'has-image' : '' %>" id="profileDropZone">
+                  <!-- Placeholder (when no image) -->
+                  <div class="upload-placeholder" id="profilePlaceholder" style="<%= currentProfile ? 'display:none' : '' %>">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    <span class="upload-placeholder-text">Drop a photo here or click to browse</span>
+                    <span class="upload-placeholder-hint">JPEG, PNG, WebP — Max 5 MB</span>
+                    <button type="button" class="upload-btn" id="profileBrowseBtn">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                      </svg>
+                      Choose Photo
+                    </button>
+                  </div>
+
+                  <!-- Preview (when image exists) -->
+                  <div class="image-preview-container <%= currentProfile ? 'visible' : '' %>" id="profilePreview">
+                    <% if (currentProfile) { %>
+                      <div class="current-image-label">Current Profile Photo</div>
+                    <% } %>
+                    <img 
+                      class="image-preview-img avatar" 
+                      id="profilePreviewImg" 
+                      src="<%= currentProfile %>" 
+                      alt="Profile preview"
+                    >
+                    <div class="image-preview-info">
+                      <span class="image-preview-name" id="profileFileName"><%= currentProfile ? currentProfile.split('/').pop() : '' %></span>
+                      <div class="image-preview-actions">
+                        <button type="button" class="image-action-btn" id="profileChangeBtn">Change</button>
+                        <button type="button" class="image-action-btn remove" id="profileRemoveBtn">Remove</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="upload-error" id="profileUploadError"></div>
+                <input 
+                  type="file" 
+                  id="profileImageInput" 
+                  name="profileImage" 
+                  accept="image/jpeg, image/png, image/webp" 
+                  style="display: none;"
+                >
+              </div>
             </div>
           </div>
         </div>
@@ -201,5 +254,121 @@
   </div>
 
   <script src="/js/theme.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // ── Profile Photo Upload UI ──
+      const profileInput = document.getElementById('profileImageInput');
+      const dropZone = document.getElementById('profileDropZone');
+      const placeholder = document.getElementById('profilePlaceholder');
+      const preview = document.getElementById('profilePreview');
+      const previewImg = document.getElementById('profilePreviewImg');
+      const fileName = document.getElementById('profileFileName');
+      const browseBtn = document.getElementById('profileBrowseBtn');
+      const changeBtn = document.getElementById('profileChangeBtn');
+      const removeBtn = document.getElementById('profileRemoveBtn');
+      const errorEl = document.getElementById('profileUploadError');
+      const existingInput = document.querySelector('input[name="existingProfileImage"]');
+
+      const MAX_SIZE = 5 * 1024 * 1024;
+      const ALLOWED = ['image/jpeg', 'image/png', 'image/webp'];
+
+      function formatSize(bytes) {
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / 1048576).toFixed(1) + ' MB';
+      }
+
+      function showError(msg) {
+        errorEl.textContent = msg;
+        errorEl.classList.add('visible');
+      }
+
+      function clearError() {
+        errorEl.textContent = '';
+        errorEl.classList.remove('visible');
+      }
+
+      function handleFile(file) {
+        clearError();
+
+        if (!ALLOWED.includes(file.type)) {
+          showError('Unsupported file type. Please use JPEG, PNG, or WebP.');
+          return;
+        }
+
+        if (file.size > MAX_SIZE) {
+          showError(`File is too large (${formatSize(file.size)}). Maximum size is 5 MB.`);
+          return;
+        }
+
+        // Show preview
+        const url = URL.createObjectURL(file);
+        previewImg.src = url;
+        fileName.textContent = `${file.name} (${formatSize(file.size)})`;
+        placeholder.style.display = 'none';
+        preview.classList.add('visible');
+        dropZone.classList.add('has-image');
+      }
+
+      function openFilePicker() {
+        profileInput.click();
+      }
+
+      profileInput.addEventListener('change', () => {
+        if (profileInput.files && profileInput.files[0]) {
+          handleFile(profileInput.files[0]);
+        }
+      });
+
+      browseBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openFilePicker();
+      });
+
+      dropZone.addEventListener('click', (e) => {
+        if (e.target === dropZone || e.target.closest('.upload-placeholder')) {
+          openFilePicker();
+        }
+      });
+
+      changeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openFilePicker();
+      });
+
+      removeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        profileInput.value = '';
+        previewImg.src = '';
+        fileName.textContent = '';
+        preview.classList.remove('visible');
+        placeholder.style.display = '';
+        dropZone.classList.remove('has-image');
+        existingInput.value = '';
+        clearError();
+      });
+
+      // Drag and drop
+      dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+      });
+
+      dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('dragover');
+      });
+
+      dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+          const dt = new DataTransfer();
+          dt.items.add(e.dataTransfer.files[0]);
+          profileInput.files = dt.files;
+          handleFile(e.dataTransfer.files[0]);
+        }
+      });
+    });
+  </script>
 </body>
 </html>

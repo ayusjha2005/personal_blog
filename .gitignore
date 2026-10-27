@@ -6,3 +6,5 @@ yarn-error.log*
 .DS_Store
 coverage/
 .system_generated/
+public/uploads/*
+!public/uploads/.gitkeep

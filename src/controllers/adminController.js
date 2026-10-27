@@ -8,6 +8,7 @@ const articleService = require('../services/articleService');
 const profileService = require('../services/profileService');
 const contactService = require('../services/contactService');
 const slugify = require('slugify');
+const { deleteOldUpload } = require('../middleware/upload');
 
 // Admin Auth
 function getLogin(req, res) {
@@ -163,9 +164,23 @@ async function getNewArticle(req, res, next) {
 // Create Article Post
 async function postNewArticle(req, res, next) {
   try {
-    const { title, slug, subtitle, excerpt, content, category, tags, coverImage, status, isFeatured } = req.body;
+    const { title, slug, subtitle, excerpt, content, category, tags, status, isFeatured } = req.body;
     const categories = await Category.find().sort({ order: 1, name: 1 }).lean();
     const unreadCount = await contactService.getUnreadCount();
+
+    // Handle upload errors from middleware
+    if (req.uploadError) {
+      return res.status(400).render('admin/article-form', {
+        title: 'Create New Article | Admin',
+        activeAdmin: 'articles',
+        article: req.body,
+        categories,
+        unreadCount,
+        isEdit: false,
+        error: req.uploadError,
+        layout: false,
+      });
+    }
 
     // Check slug uniqueness
     const generatedSlug = slug ? slugify(slug, { lower: true, strict: true }) : slugify(title, { lower: true, strict: true });
@@ -187,6 +202,14 @@ async function postNewArticle(req, res, next) {
       ? tags.split(',').map((t) => t.trim()).filter(Boolean)
       : [];
 
+    // Determine cover image: uploaded file first, then fallback
+    let coverImagePath = '/images/article-productivity.jpg';
+    if (req.file) {
+      coverImagePath = `/uploads/${req.file.filename}`;
+    } else if (req.body.coverImage) {
+      coverImagePath = req.body.coverImage;
+    }
+
     await articleService.createArticle({
       title,
       slug: generatedSlug,
@@ -195,7 +218,7 @@ async function postNewArticle(req, res, next) {
       content,
       category,
       tags: tagsArray,
-      coverImage: coverImage || '/images/article-productivity.jpg',
+      coverImage: coverImagePath,
       status: status || 'draft',
       isFeatured: isFeatured === 'true' || isFeatured === true || isFeatured === 'on',
       publishedAt: status === 'published' ? new Date() : null,
@@ -240,9 +263,24 @@ async function getEditArticle(req, res, next) {
 async function postEditArticle(req, res, next) {
   try {
     const { id } = req.params;
-    const { title, slug, subtitle, excerpt, content, category, tags, coverImage, status, isFeatured } = req.body;
+    const { title, slug, subtitle, excerpt, content, category, tags, status, isFeatured } = req.body;
     const categories = await Category.find().sort({ order: 1, name: 1 }).lean();
     const unreadCount = await contactService.getUnreadCount();
+
+    // Handle upload errors from middleware
+    if (req.uploadError) {
+      const articleData = await Article.findById(id).lean();
+      return res.status(400).render('admin/article-form', {
+        title: `Edit Article | Admin`,
+        activeAdmin: 'articles',
+        article: { ...req.body, _id: id, coverImage: articleData ? articleData.coverImage : '' },
+        categories,
+        unreadCount,
+        isEdit: true,
+        error: req.uploadError,
+        layout: false,
+      });
+    }
 
     const generatedSlug = slug ? slugify(slug, { lower: true, strict: true }) : slugify(title, { lower: true, strict: true });
     const existingSlug = await Article.findOne({ slug: generatedSlug, _id: { $ne: id } });
@@ -269,6 +307,16 @@ async function postEditArticle(req, res, next) {
       publishedAt = new Date();
     }
 
+    // Determine cover image: uploaded file > retain existing
+    let coverImagePath = existingArticle.coverImage;
+    if (req.file) {
+      coverImagePath = `/uploads/${req.file.filename}`;
+      // Clean up old uploaded file
+      deleteOldUpload(existingArticle.coverImage);
+    } else if (req.body.existingCoverImage) {
+      coverImagePath = req.body.existingCoverImage;
+    }
+
     await articleService.updateArticle(id, {
       title,
       slug: generatedSlug,
@@ -277,7 +325,7 @@ async function postEditArticle(req, res, next) {
       content,
       category,
       tags: tagsArray,
-      coverImage: coverImage || '/images/article-productivity.jpg',
+      coverImage: coverImagePath,
       status: status || 'draft',
       isFeatured: isFeatured === 'true' || isFeatured === true || isFeatured === 'on',
       publishedAt,
@@ -293,6 +341,10 @@ async function postEditArticle(req, res, next) {
 async function postDeleteArticle(req, res, next) {
   try {
     const { id } = req.params;
+    const article = await Article.findById(id).lean();
+    if (article && article.coverImage) {
+      deleteOldUpload(article.coverImage);
+    }
     await articleService.deleteArticle(id);
     res.redirect('/admin/articles');
   } catch (error) {
@@ -333,7 +385,6 @@ async function postProfile(req, res, next) {
       heroScriptQuote,
       aboutScriptQuote,
       contactScriptQuote,
-      profileImage,
       degree,
       location,
       statusText,
@@ -349,6 +400,35 @@ async function postProfile(req, res, next) {
       seoDescription,
     } = req.body;
 
+    // Handle upload errors from middleware
+    if (req.uploadError) {
+      const [currentProfile, unreadCount] = await Promise.all([
+        profileService.getProfile(),
+        contactService.getUnreadCount(),
+      ]);
+      return res.status(400).render('admin/profile', {
+        title: 'Site & Profile Settings | Admin',
+        activeAdmin: 'profile',
+        profile: currentProfile,
+        unreadCount,
+        success: null,
+        error: req.uploadError,
+        layout: false,
+      });
+    }
+
+    // Determine profile image: uploaded file > existing
+    const existingProfile = await profileService.getProfile();
+    let profileImagePath = existingProfile.profileImage || '/images/profile.jpg';
+    if (req.file) {
+      profileImagePath = `/uploads/${req.file.filename}`;
+      deleteOldUpload(existingProfile.profileImage);
+    } else if (req.body.existingProfileImage) {
+      profileImagePath = req.body.existingProfileImage;
+    } else if (req.body.profileImage) {
+      profileImagePath = req.body.profileImage;
+    }
+
     await profileService.updateProfile({
       name,
       heroHeadline,
@@ -358,7 +438,7 @@ async function postProfile(req, res, next) {
       heroScriptQuote,
       aboutScriptQuote,
       contactScriptQuote,
-      profileImage,
+      profileImage: profileImagePath,
       degree,
       location,
       statusText,

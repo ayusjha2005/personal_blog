@@ -1,7 +1,13 @@
 /* Admin Dashboard Stylesheet */
 
+/* Override body's flex-direction: column from main.css */
+body.admin-layout {
+  flex-direction: row;
+}
+
 .admin-layout {
   display: flex;
+  flex-direction: row;
   min-height: 100vh;
   background-color: var(--bg-primary);
 }
@@ -13,6 +19,10 @@
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  overflow-y: auto;
 }
 
 .admin-brand {
@@ -273,12 +283,18 @@
 }
 
 @media (max-width: 768px) {
+  body.admin-layout {
+    flex-direction: column;
+  }
+
   .admin-layout {
     flex-direction: column;
   }
 
   .admin-sidebar {
     width: 100%;
+    height: auto;
+    position: static;
     border-right: none;
     border-bottom: 1px solid var(--border-light);
   }
@@ -291,4 +307,192 @@
   .form-grid-2 {
     grid-template-columns: 1fr;
   }
+
+  .image-upload-area {
+    padding: 1.5rem;
+  }
 }
+
+/* ───── Image Upload Component ───── */
+.image-upload-wrapper {
+  position: relative;
+}
+
+.image-upload-area {
+  border: 2px dashed var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  background-color: var(--bg-surface-elevated);
+}
+
+.image-upload-area:hover,
+.image-upload-area.dragover {
+  border-color: var(--accent-highlight);
+  background-color: var(--bg-hover);
+}
+
+.image-upload-area.has-image {
+  border-style: solid;
+  padding: 1rem;
+}
+
+.upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--text-muted);
+}
+
+.upload-placeholder svg {
+  opacity: 0.5;
+}
+
+.upload-placeholder-text {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.upload-placeholder-hint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.upload-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  margin-top: 0.25rem;
+}
+
+.upload-btn:hover {
+  background-color: var(--bg-hover);
+  border-color: var(--accent-highlight);
+}
+
+.image-preview-container {
+  position: relative;
+  display: none;
+}
+
+.image-preview-container.visible {
+  display: block;
+}
+
+.image-preview-img {
+  width: 100%;
+  max-height: 280px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-light);
+}
+
+.image-preview-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  font-size: 0.8rem;
+}
+
+.image-preview-name {
+  font-weight: 600;
+  color: var(--text-primary);
+  max-width: 60%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.image-preview-size {
+  color: var(--text-muted);
+}
+
+.image-preview-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.image-action-btn {
+  padding: 0.3rem 0.6rem;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-surface);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  color: var(--text-secondary);
+}
+
+.image-action-btn:hover {
+  background-color: var(--bg-hover);
+}
+
+.image-action-btn.remove {
+  color: #DC2626;
+  border-color: #FECACA;
+}
+
+.image-action-btn.remove:hover {
+  background-color: #FEF2F2;
+}
+
+.upload-error {
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background-color: #FEF2F2;
+  border: 1px solid #FECACA;
+  border-radius: var(--radius-md);
+  color: #DC2626;
+  font-size: 0.8rem;
+  font-weight: 500;
+  display: none;
+}
+
+.upload-error.visible {
+  display: block;
+}
+
+.current-image-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Avatar Upload Specifics */
+.avatar-upload-area {
+  max-width: 480px;
+}
+
+.image-preview-img.avatar {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 0.5rem auto 1rem;
+  display: block;
+  border: 3px solid var(--accent-highlight);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+}
+
+

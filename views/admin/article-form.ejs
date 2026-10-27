@@ -49,6 +49,7 @@
         id="article-form" 
         action="<%= isEdit ? '/admin/articles/edit/' + article._id : '/admin/articles/new' %>" 
         method="POST"
+        enctype="multipart/form-data"
       >
         <div class="data-card" style="padding: 2rem;">
           <div class="form-grid-2">
@@ -118,17 +119,63 @@
               </select>
             </div>
 
-            <!-- Cover Image URL -->
-            <div class="form-group">
-              <label for="coverImage" class="form-label">Cover Image Path/URL</label>
-              <input 
-                type="text" 
-                id="coverImage" 
-                name="coverImage" 
-                class="form-input" 
-                placeholder="/images/article-productivity.jpg"
-                value="<%= article.coverImage || '/images/article-productivity.jpg' %>"
-              >
+            <!-- Cover Image Upload -->
+            <div class="form-group form-full">
+              <label class="form-label">Cover Image</label>
+              <% const currentCover = article.coverImage || ''; %>
+              <input type="hidden" name="existingCoverImage" value="<%= currentCover %>">
+
+              <div class="image-upload-wrapper" id="coverUploadWrapper">
+                <div class="image-upload-area <%= currentCover ? 'has-image' : '' %>" id="coverDropZone">
+                  <!-- Placeholder (visible when no image) -->
+                  <div class="upload-placeholder" id="coverPlaceholder" style="<%= currentCover ? 'display:none' : '' %>">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                      <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                      <polyline points="21 15 16 10 5 21"></polyline>
+                    </svg>
+                    <span class="upload-placeholder-text">Drop an image here or click to browse</span>
+                    <span class="upload-placeholder-hint">JPEG, PNG, WebP — Max 5 MB</span>
+                    <button type="button" class="upload-btn" id="coverBrowseBtn">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                      </svg>
+                      Choose Image
+                    </button>
+                  </div>
+
+                  <!-- Preview (visible when image exists) -->
+                  <div class="image-preview-container <%= currentCover ? 'visible' : '' %>" id="coverPreview">
+                    <% if (isEdit && currentCover) { %>
+                      <div class="current-image-label">Current Cover Image</div>
+                    <% } %>
+                    <img 
+                      class="image-preview-img" 
+                      id="coverPreviewImg" 
+                      src="<%= currentCover || '' %>" 
+                      alt="Cover image preview"
+                    >
+                    <div class="image-preview-info">
+                      <span class="image-preview-name" id="coverFileName"><%= currentCover ? currentCover.split('/').pop() : '' %></span>
+                      <div class="image-preview-actions">
+                        <button type="button" class="image-action-btn" id="coverChangeBtn">Change</button>
+                        <button type="button" class="image-action-btn remove" id="coverRemoveBtn">Remove</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="upload-error" id="coverUploadError"></div>
+                <input 
+                  type="file" 
+                  id="coverImageInput" 
+                  name="coverImage" 
+                  accept="image/jpeg, image/png, image/webp" 
+                  style="display: none;"
+                >
+              </div>
             </div>
 
             <!-- Tags -->
@@ -201,7 +248,7 @@
 
   <script src="/js/theme.js"></script>
   <script>
-    // Live Markdown Preview and Slug auto-generation
+    // Live Markdown Preview, Slug auto-generation, and Cover Image Upload
     document.addEventListener('DOMContentLoaded', () => {
       const titleInput = document.getElementById('title');
       const slugInput = document.getElementById('slug');
@@ -229,7 +276,122 @@
 
       contentTextarea.addEventListener('input', updatePreview);
       updatePreview();
+
+      // ── Cover Image Upload UI ──
+      const coverInput = document.getElementById('coverImageInput');
+      const dropZone = document.getElementById('coverDropZone');
+      const placeholder = document.getElementById('coverPlaceholder');
+      const preview = document.getElementById('coverPreview');
+      const previewImg = document.getElementById('coverPreviewImg');
+      const fileName = document.getElementById('coverFileName');
+      const browseBtn = document.getElementById('coverBrowseBtn');
+      const changeBtn = document.getElementById('coverChangeBtn');
+      const removeBtn = document.getElementById('coverRemoveBtn');
+      const errorEl = document.getElementById('coverUploadError');
+      const existingInput = document.querySelector('input[name="existingCoverImage"]');
+
+      const MAX_SIZE = 5 * 1024 * 1024;
+      const ALLOWED = ['image/jpeg', 'image/png', 'image/webp'];
+
+      function formatSize(bytes) {
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / 1048576).toFixed(1) + ' MB';
+      }
+
+      function showError(msg) {
+        errorEl.textContent = msg;
+        errorEl.classList.add('visible');
+      }
+
+      function clearError() {
+        errorEl.textContent = '';
+        errorEl.classList.remove('visible');
+      }
+
+      function handleFile(file) {
+        clearError();
+
+        if (!ALLOWED.includes(file.type)) {
+          showError('Unsupported file type. Please use JPEG, PNG, or WebP.');
+          return;
+        }
+
+        if (file.size > MAX_SIZE) {
+          showError(`File is too large (${formatSize(file.size)}). Maximum size is 5 MB.`);
+          return;
+        }
+
+        // Show preview
+        const url = URL.createObjectURL(file);
+        previewImg.src = url;
+        fileName.textContent = `${file.name} (${formatSize(file.size)})`;
+        placeholder.style.display = 'none';
+        preview.classList.add('visible');
+        dropZone.classList.add('has-image');
+      }
+
+      function openFilePicker() {
+        coverInput.click();
+      }
+
+      coverInput.addEventListener('change', () => {
+        if (coverInput.files && coverInput.files[0]) {
+          handleFile(coverInput.files[0]);
+        }
+      });
+
+      browseBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openFilePicker();
+      });
+
+      dropZone.addEventListener('click', (e) => {
+        if (e.target === dropZone || e.target.closest('.upload-placeholder')) {
+          openFilePicker();
+        }
+      });
+
+      changeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openFilePicker();
+      });
+
+      removeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        coverInput.value = '';
+        previewImg.src = '';
+        fileName.textContent = '';
+        preview.classList.remove('visible');
+        placeholder.style.display = '';
+        dropZone.classList.remove('has-image');
+        existingInput.value = '';
+        clearError();
+      });
+
+      // Drag and drop
+      dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+      });
+
+      dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('dragover');
+      });
+
+      dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+          // Set the file on the input
+          const dt = new DataTransfer();
+          dt.items.add(e.dataTransfer.files[0]);
+          coverInput.files = dt.files;
+          handleFile(e.dataTransfer.files[0]);
+        }
+      });
     });
   </script>
 </body>
 </html>
+
