@@ -19,7 +19,185 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="/css/themes.css">
   <link rel="stylesheet" href="/css/main.css">
-  <link rel="stylesheet" href="/css/admin.css">
+  <link rel="stylesheet" href="/css/admin.css?v=2">
+
+  <style>
+    /* Immediate inlined styles for robust avatar upload UI */
+    .image-upload-wrapper { width: 100%; position: relative; }
+    .avatar-upload-area {
+      max-width: 500px;
+      display: block;
+      border: 2px dashed rgba(255, 255, 255, 0.18);
+      border-radius: 14px;
+      padding: 2.25rem 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.02);
+      transition: all 0.2s ease;
+      box-sizing: border-box;
+    }
+    [data-theme="light"] .avatar-upload-area {
+      border: 2px dashed #D1D5DB;
+      background: #F9FAFB;
+    }
+    .avatar-upload-area:hover, .avatar-upload-area.dragover {
+      border-color: #3B82F6 !important;
+      background: rgba(59, 130, 246, 0.06) !important;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+    .upload-placeholder {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 0.75rem !important;
+    }
+    .upload-icon-circle {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: rgba(59, 130, 246, 0.14);
+      color: #3B82F6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0.25rem;
+    }
+    .upload-text-block {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      align-items: center;
+    }
+    .upload-placeholder-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: inherit;
+    }
+    .upload-browse-link {
+      color: #3B82F6;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .upload-placeholder-hint {
+      font-size: 0.8rem;
+      color: var(--text-muted, #9CA3AF);
+    }
+    .upload-btn {
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 0.5rem !important;
+      padding: 0.55rem 1.25rem !important;
+      background: #2563EB !important;
+      color: #FFFFFF !important;
+      border: none !important;
+      border-radius: 9999px !important;
+      font-size: 0.85rem !important;
+      font-weight: 600 !important;
+      cursor: pointer !important;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35) !important;
+      margin-top: 0.35rem !important;
+      transition: all 0.2s ease !important;
+    }
+    .upload-btn:hover {
+      background: #1D4ED8 !important;
+      transform: translateY(-1px);
+    }
+    .avatar-preview-card {
+      max-width: 500px;
+      border-radius: 14px;
+      overflow: hidden;
+      background: var(--bg-surface, #1A1D24);
+      border: 1px solid var(--border-light, rgba(255, 255, 255, 0.12));
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+    .avatar-preview-media {
+      padding: 2rem 1rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: var(--bg-surface-elevated, #16181D);
+      position: relative;
+    }
+    .image-preview-img.avatar {
+      width: 140px !important;
+      height: 140px !important;
+      border-radius: 50% !important;
+      object-fit: cover !important;
+      border: 3px solid #3B82F6 !important;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+      display: block;
+    }
+    .image-preview-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.85rem 1.15rem;
+      background: var(--bg-surface-elevated, #16181D);
+      border-top: 1px solid var(--border-light, rgba(255, 255, 255, 0.08));
+    }
+    .image-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      color: var(--text-secondary, #9CA3AF);
+      font-size: 0.85rem;
+      overflow: hidden;
+      max-width: 60%;
+    }
+    .image-preview-name {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-weight: 500;
+      color: var(--text-primary, #FFFFFF);
+    }
+    .image-preview-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .image-action-btn {
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 0.4rem !important;
+      padding: 0.45rem 0.9rem !important;
+      font-size: 0.8rem !important;
+      font-weight: 600 !important;
+      border-radius: 8px !important;
+      cursor: pointer !important;
+      transition: all 0.15s ease !important;
+    }
+    .image-action-btn.change {
+      background: var(--bg-surface, #21262D) !important;
+      color: var(--text-primary, #F0F6FC) !important;
+      border: 1px solid var(--border-light, rgba(255, 255, 255, 0.15)) !important;
+    }
+    .image-action-btn.change:hover {
+      background: var(--bg-hover, #30363D) !important;
+      border-color: #3B82F6 !important;
+    }
+    .image-action-btn.remove {
+      background: rgba(220, 38, 38, 0.12) !important;
+      color: #F87171 !important;
+      border: 1px solid rgba(220, 38, 38, 0.3) !important;
+    }
+    .image-action-btn.remove:hover {
+      background: #DC2626 !important;
+      color: #FFFFFF !important;
+      border-color: #DC2626 !important;
+    }
+    .upload-error-box {
+      margin-top: 0.6rem;
+      padding: 0.65rem 0.9rem;
+      background: rgba(220, 38, 38, 0.1);
+      border: 1px solid rgba(220, 38, 38, 0.3);
+      border-radius: 8px;
+      color: #F87171;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+  </style>
 </head>
 <body class="admin-layout">
   <%- include('sidebar') %>
@@ -100,22 +278,26 @@
 
             <!-- Profile Photo Upload -->
             <div class="form-group form-full">
-              <label class="form-label">Profile Photo</label>
+              <label class="form-label" style="font-weight: 600; margin-bottom: 0.6rem; display: block;">Profile Photo</label>
               <% const currentProfile = profile.profileImage || '/images/profile.jpg'; %>
               <input type="hidden" name="existingProfileImage" value="<%= currentProfile %>">
 
               <div class="image-upload-wrapper" id="profileUploadWrapper">
-                <div class="image-upload-area avatar-upload-area <%= currentProfile ? 'has-image' : '' %>" id="profileDropZone">
-                  <!-- Placeholder (when no image) -->
-                  <div class="upload-placeholder" id="profilePlaceholder" style="<%= currentProfile ? 'display:none' : '' %>">
-                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                      <circle cx="12" cy="7" r="4"></circle>
-                    </svg>
-                    <span class="upload-placeholder-text">Drop a photo here or click to browse</span>
-                    <span class="upload-placeholder-hint">JPEG, PNG, WebP — Max 5 MB</span>
+                <!-- Dropzone Area -->
+                <div class="image-upload-area avatar-upload-area <%= currentProfile ? 'has-image' : '' %>" id="profileDropZone" style="<%= currentProfile ? 'display: none;' : 'display: block;' %>">
+                  <div class="upload-placeholder" id="profilePlaceholder">
+                    <div class="upload-icon-circle">
+                      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                      </svg>
+                    </div>
+                    <div class="upload-text-block">
+                      <span class="upload-placeholder-title">Drop your photo here, or <span class="upload-browse-link">browse</span></span>
+                      <span class="upload-placeholder-hint">Square portrait recommended &bull; Maximum file size: 5 MB</span>
+                    </div>
                     <button type="button" class="upload-btn" id="profileBrowseBtn">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                         <polyline points="17 8 12 3 7 8"></polyline>
                         <line x1="12" y1="3" x2="12" y2="15"></line>
@@ -123,29 +305,49 @@
                       Choose Photo
                     </button>
                   </div>
+                </div>
 
-                  <!-- Preview (when image exists) -->
-                  <div class="image-preview-container <%= currentProfile ? 'visible' : '' %>" id="profilePreview">
-                    <% if (currentProfile) { %>
-                      <div class="current-image-label">Current Profile Photo</div>
-                    <% } %>
+                <!-- Preview Card -->
+                <div class="avatar-preview-card" id="profilePreview" style="<%= currentProfile ? 'display: block;' : 'display: none;' %>">
+                  <div class="avatar-preview-media">
+                    <div class="preview-badge" id="profileBadge">Profile Photo</div>
                     <img 
                       class="image-preview-img avatar" 
                       id="profilePreviewImg" 
-                      src="<%= currentProfile %>" 
+                      <% if (currentProfile) { %>src="<%= currentProfile %>"<% } %>
                       alt="Profile preview"
+                      style="<%= currentProfile ? 'display: block;' : 'display: none;' %>"
                     >
-                    <div class="image-preview-info">
+                  </div>
+                  <div class="image-preview-footer">
+                    <div class="image-meta">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                      </svg>
                       <span class="image-preview-name" id="profileFileName"><%= currentProfile ? currentProfile.split('/').pop() : '' %></span>
-                      <div class="image-preview-actions">
-                        <button type="button" class="image-action-btn" id="profileChangeBtn">Change</button>
-                        <button type="button" class="image-action-btn remove" id="profileRemoveBtn">Remove</button>
-                      </div>
+                    </div>
+                    <div class="image-preview-actions">
+                      <button type="button" class="image-action-btn change" id="profileChangeBtn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                          <polyline points="17 8 12 3 7 8"></polyline>
+                          <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        Change
+                      </button>
+                      <button type="button" class="image-action-btn remove" id="profileRemoveBtn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <polyline points="3 6 5 6 21 6"></polyline>
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                        Remove
+                      </button>
                     </div>
                   </div>
                 </div>
 
-                <div class="upload-error" id="profileUploadError"></div>
+                <div class="upload-error-box" id="profileUploadError" style="display: none;"></div>
                 <input 
                   type="file" 
                   id="profileImageInput" 
@@ -280,12 +482,12 @@
 
       function showError(msg) {
         errorEl.textContent = msg;
-        errorEl.classList.add('visible');
+        errorEl.style.display = 'block';
       }
 
       function clearError() {
         errorEl.textContent = '';
-        errorEl.classList.remove('visible');
+        errorEl.style.display = 'none';
       }
 
       function handleFile(file) {
@@ -304,10 +506,10 @@
         // Show preview
         const url = URL.createObjectURL(file);
         previewImg.src = url;
+        previewImg.style.display = 'block';
         fileName.textContent = `${file.name} (${formatSize(file.size)})`;
-        placeholder.style.display = 'none';
-        preview.classList.add('visible');
-        dropZone.classList.add('has-image');
+        dropZone.style.display = 'none';
+        preview.style.display = 'block';
       }
 
       function openFilePicker() {
@@ -326,9 +528,7 @@
       });
 
       dropZone.addEventListener('click', (e) => {
-        if (e.target === dropZone || e.target.closest('.upload-placeholder')) {
-          openFilePicker();
-        }
+        openFilePicker();
       });
 
       changeBtn.addEventListener('click', (e) => {
@@ -339,10 +539,11 @@
       removeBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         profileInput.value = '';
-        previewImg.src = '';
+        previewImg.removeAttribute('src');
+        previewImg.style.display = 'none';
         fileName.textContent = '';
-        preview.classList.remove('visible');
-        placeholder.style.display = '';
+        preview.style.display = 'none';
+        dropZone.style.display = 'block';
         dropZone.classList.remove('has-image');
         existingInput.value = '';
         clearError();
