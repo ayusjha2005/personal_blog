@@ -12,7 +12,7 @@
   <meta property="og:title" content="<%= typeof title !== 'undefined' ? title : 'Ayush Jha | Ideas. Code. Progress.' %>">
   <meta property="og:description" content="<%= profile.seoDescription || 'Ideas. Code. Progress.' %>">
   <meta property="og:type" content="website">
-  <meta property="og:image" content="<%= profile.profileImage || '/images/hero-mountain.jpg' %>">
+  <meta property="og:image" content="<%= resolveImage(profile.profileImage, '/images/hero-mountain.jpg') %>">
 
   <!-- Early Theme Detection to prevent theme flash (FOUC) -->
   <script>

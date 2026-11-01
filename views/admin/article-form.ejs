@@ -363,9 +363,10 @@
                     <img 
                       class="image-preview-img" 
                       id="coverPreviewImg" 
-                      <% if (currentCover) { %>src="<%= currentCover %>"<% } %>
+                      <% if (currentCover) { %>src="<%= resolveImage(currentCover, '/images/article-productivity.jpg') %>"<% } %>
                       alt="Cover image preview"
                       style="<%= currentCover ? 'display: block;' : 'display: none;' %>"
+                      onerror="this.onerror=null;this.src='/images/article-productivity.jpg';"
                     >
                   </div>
                   <div class="image-preview-footer">

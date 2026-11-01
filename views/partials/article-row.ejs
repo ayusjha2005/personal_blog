@@ -1,6 +1,6 @@
 <article class="article-row-card">
   <a href="/blog/<%= article.slug %>" class="article-row-img-wrap" aria-label="<%= article.title %>">
-    <img src="<%= article.coverImage || '/images/article-productivity.jpg' %>" alt="<%= article.title %>" class="article-row-img" loading="lazy">
+    <img src="<%= resolveImage(article.coverImage, '/images/article-productivity.jpg') %>" alt="<%= article.title %>" class="article-row-img" loading="lazy" onerror="this.onerror=null;this.src='/images/article-productivity.jpg';">
   </a>
   <div class="article-row-content">
     <div class="article-row-header">

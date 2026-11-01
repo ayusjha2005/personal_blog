@@ -1,6 +1,6 @@
 <article class="post-card">
   <a href="/blog/<%= article.slug %>" class="post-card-img-wrap" aria-label="<%= article.title %>">
-    <img src="<%= article.coverImage || '/images/article-productivity.jpg' %>" alt="<%= article.title %>" class="post-card-img" loading="lazy">
+    <img src="<%= resolveImage(article.coverImage, '/images/article-productivity.jpg') %>" alt="<%= article.title %>" class="post-card-img" loading="lazy" onerror="this.onerror=null;this.src='/images/article-productivity.jpg';">
     <% if (article.category) { %>
       <span class="category-badge badge-on-image"><%= article.category.name || article.category %></span>
     <% } %>

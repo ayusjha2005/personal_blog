@@ -217,10 +217,23 @@ async function postNewArticle(req, res, next) {
     let uploadedAsset = null;
 
     if (req.file) {
-      uploadedAsset = await processImageUpload(req.file, 'personal-blog/articles');
-      if (uploadedAsset) {
-        coverImagePath = uploadedAsset.url;
-        coverImagePublicId = uploadedAsset.publicId;
+      try {
+        uploadedAsset = await processImageUpload(req.file, 'personal-blog/articles');
+        if (uploadedAsset) {
+          coverImagePath = uploadedAsset.url;
+          coverImagePublicId = uploadedAsset.publicId;
+        }
+      } catch (uploadErr) {
+        return res.status(400).render('admin/article-form', {
+          title: 'Create New Article | Admin',
+          activeAdmin: 'articles',
+          article: req.body,
+          categories: CATEGORIES,
+          unreadCount,
+          isEdit: false,
+          error: `Image upload failed: ${uploadErr.message}`,
+          layout: false,
+        });
       }
     } else if (req.body.coverImage) {
       coverImagePath = req.body.coverImage;
@@ -350,15 +363,28 @@ async function postEditArticle(req, res, next) {
     let oldCoverToDelete = null;
 
     if (req.file) {
-      uploadedAsset = await processImageUpload(req.file, 'personal-blog/articles');
-      if (uploadedAsset) {
-        coverImagePath = uploadedAsset.url;
-        coverImagePublicId = uploadedAsset.publicId;
-        // Schedule old asset deletion only after DB update succeeds
-        oldCoverToDelete = {
-          url: existingArticle.coverImage,
-          publicId: existingArticle.coverImagePublicId,
-        };
+      try {
+        uploadedAsset = await processImageUpload(req.file, 'personal-blog/articles');
+        if (uploadedAsset) {
+          coverImagePath = uploadedAsset.url;
+          coverImagePublicId = uploadedAsset.publicId;
+          // Schedule old asset deletion only after DB update succeeds
+          oldCoverToDelete = {
+            url: existingArticle.coverImage,
+            publicId: existingArticle.coverImagePublicId,
+          };
+        }
+      } catch (uploadErr) {
+        return res.status(400).render('admin/article-form', {
+          title: 'Edit Article | Admin',
+          activeAdmin: 'articles',
+          article: { ...req.body, _id: id, coverImage: existingArticle ? existingArticle.coverImage : '' },
+          categories: CATEGORIES,
+          unreadCount,
+          isEdit: true,
+          error: `Image upload failed: ${uploadErr.message}`,
+          layout: false,
+        });
       }
     } else if (req.body.existingCoverImage) {
       coverImagePath = req.body.existingCoverImage;
@@ -486,14 +512,30 @@ async function postProfile(req, res, next) {
     let oldProfileToDelete = null;
 
     if (req.file) {
-      uploadedAsset = await processImageUpload(req.file, 'personal-blog/profile');
-      if (uploadedAsset) {
-        profileImagePath = uploadedAsset.url;
-        profileImagePublicId = uploadedAsset.publicId;
-        oldProfileToDelete = {
-          url: existingProfile.profileImage,
-          publicId: existingProfile.profileImagePublicId,
-        };
+      try {
+        uploadedAsset = await processImageUpload(req.file, 'personal-blog/profile');
+        if (uploadedAsset) {
+          profileImagePath = uploadedAsset.url;
+          profileImagePublicId = uploadedAsset.publicId;
+          oldProfileToDelete = {
+            url: existingProfile.profileImage,
+            publicId: existingProfile.profileImagePublicId,
+          };
+        }
+      } catch (uploadErr) {
+        const [currentProfile, currentUnread] = await Promise.all([
+          profileService.getProfile(),
+          contactService.getUnreadCount(),
+        ]);
+        return res.status(400).render('admin/profile', {
+          title: 'Site & Profile Settings | Admin',
+          activeAdmin: 'profile',
+          profile: currentProfile,
+          unreadCount: currentUnread,
+          success: null,
+          error: `Image upload failed: ${uploadErr.message}`,
+          layout: false,
+        });
       }
     } else if (req.body.existingProfileImage) {
       profileImagePath = req.body.existingProfileImage;

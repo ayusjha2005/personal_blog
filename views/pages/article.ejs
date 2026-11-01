@@ -27,7 +27,7 @@
 
         <div class="author-bar">
           <div class="author-info">
-            <img src="<%= profile.profileImage || '/images/profile.jpg' %>" alt="<%= profile.name %>" class="author-avatar">
+            <img src="<%= resolveImage(profile.profileImage, '/images/profile.jpg') %>" alt="<%= profile.name %>" class="author-avatar" onerror="this.onerror=null;this.src='/images/profile.jpg';">
             <div class="author-meta">
               <span class="author-name">By <%= profile.name || 'Ayush Jha' %></span>
               <span>&bull;</span>
@@ -73,7 +73,7 @@
       <!-- Full-Width Hero Cover Image -->
       <% if (article.coverImage) { %>
         <div class="article-hero-cover">
-          <img src="<%= article.coverImage %>" alt="<%= article.title %>">
+          <img src="<%= resolveImage(article.coverImage, '/images/article-productivity.jpg') %>" alt="<%= article.title %>" onerror="this.onerror=null;this.src='/images/article-productivity.jpg';">
         </div>
       <% } %>
 
@@ -105,7 +105,7 @@
               <div class="related-list">
                 <% relatedArticles.forEach(function(rel) { %>
                   <a href="/blog/<%= rel.slug %>" class="related-item">
-                    <img src="<%= rel.coverImage || '/images/article-productivity.jpg' %>" alt="<%= rel.title %>" class="related-thumb" loading="lazy">
+                    <img src="<%= resolveImage(rel.coverImage, '/images/article-productivity.jpg') %>" alt="<%= rel.title %>" class="related-thumb" loading="lazy" onerror="this.onerror=null;this.src='/images/article-productivity.jpg';">
                     <div>
                       <h3 class="related-item-title"><%= truncate(rel.title, 50) %></h3>
                       <span class="related-item-date"><%= formatDate(rel.publishedAt || rel.createdAt) %></span>

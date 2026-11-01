@@ -105,7 +105,7 @@
 
           <div class="featured-card">
             <a href="/blog/<%= featuredArticle.slug %>" class="featured-img-wrap" aria-label="<%= featuredArticle.title %>">
-              <img src="<%= featuredArticle.coverImage || '/images/article-productivity.jpg' %>" alt="<%= featuredArticle.title %>" class="featured-img">
+              <img src="<%= resolveImage(featuredArticle.coverImage, '/images/article-productivity.jpg') %>" alt="<%= featuredArticle.title %>" class="featured-img" onerror="this.onerror=null;this.src='/images/article-productivity.jpg';">
               <% if (featuredArticle.category) { %>
                 <span class="category-badge badge-on-image"><%= featuredArticle.category.name || featuredArticle.category %></span>
               <% } %>

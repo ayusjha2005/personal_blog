@@ -326,9 +326,10 @@
                     <img 
                       class="image-preview-img avatar" 
                       id="profilePreviewImg" 
-                      <% if (currentProfile) { %>src="<%= currentProfile %>"<% } %>
+                      <% if (currentProfile) { %>src="<%= resolveImage(currentProfile, '/images/profile.jpg') %>"<% } %>
                       alt="Profile preview"
                       style="<%= currentProfile ? 'display: block;' : 'display: none;' %>"
+                      onerror="this.onerror=null;this.src='/images/profile.jpg';"
                     >
                   </div>
                   <div class="image-preview-footer">

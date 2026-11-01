@@ -8,7 +8,7 @@ const compression = require('compression');
 const helmet = require('helmet');
 
 const Profile = require('./models/Profile');
-const { formatDate, formatISODate, truncate } = require('./utils/helpers');
+const { formatDate, formatISODate, truncate, resolveImage } = require('./utils/helpers');
 const { notFoundHandler, globalErrorHandler } = require('./middleware/errorHandler');
 
 // Route imports
@@ -126,6 +126,7 @@ app.use(async (req, res, next) => {
     res.locals.formatDate = formatDate;
     res.locals.formatISODate = formatISODate;
     res.locals.truncate = truncate;
+    res.locals.resolveImage = resolveImage;
 
     next();
   } catch (error) {

@@ -8,7 +8,7 @@
         <!-- Left: Portrait Photo Card with Cursive Script Quote -->
         <div class="about-photo-card">
           <div class="about-photo-img-wrap">
-            <img src="<%= profile.profileImage || '/images/profile.jpg' %>" alt="<%= profile.name || 'Ayush Jha' %>" class="about-photo-img">
+            <img src="<%= resolveImage(profile.profileImage, '/images/profile.jpg') %>" alt="<%= profile.name || 'Ayush Jha' %>" class="about-photo-img" onerror="this.onerror=null;this.src='/images/profile.jpg';">
           </div>
           <div class="photo-dots" aria-hidden="true">
             <span class="photo-dot active"></span>

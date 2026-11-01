@@ -45,7 +45,7 @@ const articleSchema = new mongoose.Schema(
     },
     coverImage: {
       type: String,
-      default: '/images/hero-desktop.jpg',
+      default: '/images/article-productivity.jpg',
     },
     coverImagePublicId: {
       type: String,

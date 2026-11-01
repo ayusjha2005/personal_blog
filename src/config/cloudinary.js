@@ -1,12 +1,18 @@
 const cloudinary = require('cloudinary').v2;
 
 // Configure Cloudinary with environment variables
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-  secure: true,
-});
+if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET) {
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+    secure: true,
+  });
+} else if (process.env.CLOUDINARY_URL) {
+  cloudinary.config({
+    secure: true,
+  });
+}
 
 /**
  * Checks if Cloudinary is fully configured via environment variables
@@ -14,9 +20,16 @@ cloudinary.config({
  */
 function isConfigured() {
   return Boolean(
-    process.env.CLOUDINARY_CLOUD_NAME &&
-    process.env.CLOUDINARY_API_KEY &&
-    process.env.CLOUDINARY_API_SECRET
+    process.env.CLOUDINARY_URL ||
+    (process.env.CLOUDINARY_CLOUD_NAME &&
+      process.env.CLOUDINARY_API_KEY &&
+      process.env.CLOUDINARY_API_SECRET)
+  );
+}
+
+if (process.env.NODE_ENV === 'production' && !isConfigured()) {
+  console.warn(
+    '[WARN] Cloudinary is NOT configured. Uploaded images will use local ephemeral storage which does not persist across restarts on Render. Please configure CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET (or CLOUDINARY_URL) in your Render environment.'
   );
 }
 
