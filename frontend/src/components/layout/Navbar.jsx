@@ -28,13 +28,13 @@ export default function Navbar() {
     <>
       <header className="sticky top-0 z-40 w-full backdrop-blur-xl bg-[#07080B]/80 border-b border-white/5 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-18 flex items-center justify-between">
-          {/* Brand Logo: </> AyushJha.dev */}
-          <Link to="/" className="flex items-center gap-2 group">
+          {/* Brand Logo: </> Ayush Jha */}
+          <Link to="/" className="flex items-center gap-2 group" aria-label="Ayush Jha Home">
             <span className="text-crimson font-mono font-bold text-xl tracking-tighter drop-shadow-[0_0_8px_rgba(225,29,72,0.6)]">
               &lt;/&gt;
             </span>
             <span className="font-extrabold text-xl tracking-tight text-white font-heading group-hover:text-crimson transition-colors">
-              AyushJha<span className="text-crimson">.dev</span>
+              Ayush <span className="text-crimson">Jha</span>
             </span>
           </Link>
 

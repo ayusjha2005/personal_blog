@@ -63,8 +63,8 @@ router.get('/profile', async (req, res, next) => {
         location: 'Based in India',
         statusText: 'Always learning',
         socialLinks: {
-          github: 'https://github.com/ayushjha',
-          linkedin: 'https://linkedin.com/in/ayushjha',
+          github: 'https://github.com/ayusjha2005',
+          linkedin: 'https://www.linkedin.com/in/kumar-ayush-322294385/',
           twitter: 'https://x.com/ayushjha',
           instagram: 'https://instagram.com/ayushjha',
           email: 'ayushjha@gmail.com',

@@ -28,7 +28,7 @@ export default function ProjectShowcase() {
       desc: 'A developer blog to write, share and document my learnings.',
       image: '/images/hero-crimson-planet.jpg',
       tags: ['Express', 'MongoDB', 'React'],
-      link: '/',
+      link: 'https://github.com/ayusjha2005/personal_blog',
     },
   ];
 
@@ -81,61 +81,64 @@ export default function ProjectShowcase() {
           </div>
         </div>
 
-        {/* 3-Column Project Grid (Exact Match to Reference Image) */}
+        {/* 3-Column Project Grid (Entire card clickable) */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {projects.map((proj, idx) => (
-            <motion.div
-              key={proj.id}
-              whileHover={{ y: -8, scale: 1.01 }}
-              transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-              className="group relative flex flex-col justify-between overflow-hidden rounded-2xl bg-[#0E1116] border border-white/10 hover:border-crimson/50 hover:shadow-[0_0_30px_rgba(225,29,72,0.25)] transition-all duration-300 p-4 sm:p-5"
-            >
-              <div>
-                {/* Preview Image with Hover Zoom & Diagonal Link */}
-                <div className="relative aspect-[16/10] overflow-hidden rounded-xl mb-4 bg-black/40">
-                  <img
-                    src={proj.image}
-                    alt={proj.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0E1116]/80 via-transparent to-transparent opacity-60" />
+          {projects.map((proj) => {
+            const isExternal = proj.link.startsWith('http');
+            return (
+              <motion.a
+                key={proj.id}
+                href={proj.link}
+                {...(isExternal ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                aria-label={`View ${proj.title} project (opens in new tab)`}
+                whileHover={{ y: -8, scale: 1.01 }}
+                transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+                className="group relative flex flex-col justify-between overflow-hidden rounded-2xl bg-[#0E1116] border border-white/10 hover:border-crimson/50 hover:shadow-[0_0_30px_rgba(225,29,72,0.25)] transition-all duration-300 p-4 sm:p-5 cursor-pointer block no-underline"
+              >
+                <div>
+                  {/* Preview Image with Hover Zoom & Diagonal Link */}
+                  <div className="relative aspect-[16/10] overflow-hidden rounded-xl mb-4 bg-black/40">
+                    <img
+                      src={proj.image}
+                      alt={proj.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0E1116]/80 via-transparent to-transparent opacity-60" />
 
-                  {/* Diagonal Arrow Icon */}
-                  <a
-                    href={proj.link}
-                    target="_blank"
-                    rel="noreferrer"
-                    aria-label={`Open ${proj.title}`}
-                    className="absolute top-3 right-3 w-8 h-8 rounded-full bg-[#07080B]/80 backdrop-blur-md border border-white/20 flex items-center justify-center text-white group-hover:bg-crimson group-hover:border-crimson transition-colors shadow-lg"
-                  >
-                    <ArrowUpRight className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                  </a>
+                    {/* Diagonal Arrow Icon */}
+                    <div
+                      aria-hidden="true"
+                      className="absolute top-3 right-3 w-8 h-8 rounded-full bg-[#07080B]/80 backdrop-blur-md border border-white/20 flex items-center justify-center text-white group-hover:bg-crimson group-hover:border-crimson transition-colors shadow-lg"
+                    >
+                      <ArrowUpRight className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                    </div>
+                  </div>
+
+                  {/* Title */}
+                  <h3 className="text-lg font-bold font-heading text-white group-hover:text-crimson transition-colors mb-2">
+                    {proj.title}
+                  </h3>
+
+                  {/* Description */}
+                  <p className="text-xs sm:text-sm text-slate-400 leading-relaxed mb-4">
+                    {proj.desc}
+                  </p>
                 </div>
 
-                {/* Title */}
-                <h3 className="text-lg font-bold font-heading text-white group-hover:text-crimson transition-colors mb-2">
-                  {proj.title}
-                </h3>
-
-                {/* Description */}
-                <p className="text-xs sm:text-sm text-slate-400 leading-relaxed mb-4">
-                  {proj.desc}
-                </p>
-              </div>
-
-              {/* Technology Tags Row */}
-              <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-white/5">
-                {proj.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="px-2.5 py-0.5 text-xs font-mono font-semibold rounded-full bg-white/5 border border-white/10 text-slate-300 group-hover:border-crimson/30 transition-colors"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </motion.div>
-          ))}
+                {/* Technology Tags Row */}
+                <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-white/5">
+                  {proj.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="px-2.5 py-0.5 text-xs font-mono font-semibold rounded-full bg-white/5 border border-white/10 text-slate-300 group-hover:border-crimson/30 transition-colors"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </motion.a>
+            );
+          })}
         </div>
 
         {/* Pagination Dots Indicator */}

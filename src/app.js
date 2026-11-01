@@ -118,8 +118,8 @@ const defaultProfile = {
   bio: "I'm Ayush Jha, a computer science student who loves building things, learning new technologies, and exploring how software can solve real-world problems.",
   tagline: 'Learning in public, building in private.',
   socialLinks: {
-    github: 'https://github.com/ayushjha',
-    linkedin: 'https://linkedin.com/in/ayushjha',
+    github: 'https://github.com/ayusjha2005',
+    linkedin: 'https://www.linkedin.com/in/kumar-ayush-322294385/',
     twitter: 'https://x.com/ayushjha',
     instagram: 'https://instagram.com/ayushjha',
     email: 'reach2kr.ayush@gmail.com',

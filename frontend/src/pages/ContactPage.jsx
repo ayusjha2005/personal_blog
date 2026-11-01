@@ -54,6 +54,8 @@ export default function ContactPage() {
   };
 
   const social = profile.socialLinks || {};
+  const githubUrl = social.github || 'https://github.com/ayusjha2005';
+  const linkedinUrl = social.linkedin || 'https://www.linkedin.com/in/kumar-ayush-322294385/';
 
   return (
     <motion.div
@@ -113,33 +115,47 @@ export default function ContactPage() {
               </div>
             </div>
 
-            {social.linkedin && (
-              <div className="flex items-center gap-3 text-slate-200 text-xs sm:text-sm">
-                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center shrink-0">
-                  <LinkedinIcon className="w-4 h-4 text-crimson" />
+            {/* LinkedIn */}
+            <a
+              href={linkedinUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Connect with Ayush Jha on LinkedIn (opens in new tab)"
+              className="group/link flex items-center gap-3.5 text-slate-200 hover:text-white transition-all p-2 -mx-2 rounded-2xl hover:bg-white/5 active:scale-98"
+            >
+              <div className="w-9 h-9 rounded-xl bg-white/10 group-hover/link:bg-crimson/20 border border-white/10 group-hover/link:border-crimson/50 flex items-center justify-center shrink-0 transition-all duration-300 group-hover/link:scale-110 shadow-sm">
+                <LinkedinIcon className="w-4 h-4 text-slate-300 group-hover/link:text-crimson transition-colors" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-[10px] text-slate-400 group-hover/link:text-crimson font-bold uppercase tracking-wider transition-colors">
+                  LinkedIn
                 </div>
-                <div>
-                  <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">LinkedIn</div>
-                  <a href={social.linkedin} target="_blank" rel="noreferrer" className="hover:text-crimson transition-colors">
-                    linkedin.com/in/ayushjha
-                  </a>
+                <div className="text-xs sm:text-sm text-slate-200 group-hover/link:text-white group-hover/link:underline decoration-crimson/60 underline-offset-4 transition-colors font-medium truncate">
+                  linkedin.com/in/kumar-ayush-322294385/
                 </div>
               </div>
-            )}
+            </a>
 
-            {social.github && (
-              <div className="flex items-center gap-3 text-slate-200 text-xs sm:text-sm">
-                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center shrink-0">
-                  <GithubIcon className="w-4 h-4 text-crimson" />
+            {/* GitHub */}
+            <a
+              href={githubUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Visit Ayush Jha on GitHub (opens in new tab)"
+              className="group/link flex items-center gap-3.5 text-slate-200 hover:text-white transition-all p-2 -mx-2 rounded-2xl hover:bg-white/5 active:scale-98"
+            >
+              <div className="w-9 h-9 rounded-xl bg-white/10 group-hover/link:bg-crimson/20 border border-white/10 group-hover/link:border-crimson/50 flex items-center justify-center shrink-0 transition-all duration-300 group-hover/link:scale-110 shadow-sm">
+                <GithubIcon className="w-4 h-4 text-slate-300 group-hover/link:text-crimson transition-colors" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-[10px] text-slate-400 group-hover/link:text-crimson font-bold uppercase tracking-wider transition-colors">
+                  GitHub
                 </div>
-                <div>
-                  <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">GitHub</div>
-                  <a href={social.github} target="_blank" rel="noreferrer" className="hover:text-crimson transition-colors">
-                    github.com/ayushjha
-                  </a>
+                <div className="text-xs sm:text-sm text-slate-200 group-hover/link:text-white group-hover/link:underline decoration-crimson/60 underline-offset-4 transition-colors font-medium truncate">
+                  github.com/ayusjha2005
                 </div>
               </div>
-            )}
+            </a>
           </div>
 
           {/* Cursive quote */}

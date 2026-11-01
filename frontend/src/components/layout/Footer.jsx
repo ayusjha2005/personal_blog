@@ -20,49 +20,55 @@ export default function Footer() {
             <p className="text-sm text-secondary max-w-md leading-relaxed">
               Personal developer journal covering full-stack web development, software engineering, databases, Linux, and algorithms. Built with passion, ideas, and code.
             </p>
-            <div className="pt-2 flex items-center gap-3">
+            <div className="pt-2 flex flex-wrap items-center gap-3">
               <a
-                href="https://github.com/ayushjha"
+                href="https://github.com/ayusjha2005"
                 target="_blank"
-                rel="noreferrer"
-                className="w-9 h-9 rounded-full flex items-center justify-center border border-subtle text-secondary hover:text-crimson hover:border-crimson/40 hover:bg-surface-elevated transition-colors"
-                aria-label="GitHub"
+                rel="noopener noreferrer"
+                className="group inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-subtle bg-surface-elevated text-xs font-medium text-secondary hover:text-white hover:border-crimson/50 hover:bg-crimson/10 hover:shadow-[0_0_15px_rgba(225,29,72,0.3)] hover:scale-105 active:scale-95 transition-all duration-300"
+                aria-label="Visit Ayush Jha on GitHub (opens in new tab)"
               >
-                <GithubIcon className="w-4 h-4" />
+                <GithubIcon className="w-4 h-4 text-slate-300 group-hover:text-crimson transition-colors" />
+                <span className="font-sans">GitHub</span>
               </a>
+
               <a
-                href="https://linkedin.com/in/ayushjha"
+                href="https://www.linkedin.com/in/kumar-ayush-322294385/"
                 target="_blank"
-                rel="noreferrer"
-                className="w-9 h-9 rounded-full flex items-center justify-center border border-subtle text-secondary hover:text-crimson hover:border-crimson/40 hover:bg-surface-elevated transition-colors"
-                aria-label="LinkedIn"
+                rel="noopener noreferrer"
+                className="group inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-subtle bg-surface-elevated text-xs font-medium text-secondary hover:text-white hover:border-crimson/50 hover:bg-crimson/10 hover:shadow-[0_0_15px_rgba(225,29,72,0.3)] hover:scale-105 active:scale-95 transition-all duration-300"
+                aria-label="Connect with Ayush Jha on LinkedIn (opens in new tab)"
               >
-                <LinkedinIcon className="w-4 h-4" />
+                <LinkedinIcon className="w-4 h-4 text-slate-300 group-hover:text-crimson transition-colors" />
+                <span className="font-sans">LinkedIn</span>
               </a>
+
               <a
                 href="https://x.com/ayushjha"
                 target="_blank"
-                rel="noreferrer"
-                className="w-9 h-9 rounded-full flex items-center justify-center border border-subtle text-secondary hover:text-crimson hover:border-crimson/40 hover:bg-surface-elevated transition-colors"
-                aria-label="Twitter / X"
+                rel="noopener noreferrer"
+                className="w-8 h-8 rounded-full flex items-center justify-center border border-subtle text-secondary hover:text-crimson hover:border-crimson/40 hover:bg-surface-elevated hover:scale-105 transition-all"
+                aria-label="Twitter / X profile"
               >
-                <TwitterIcon className="w-4 h-4" />
+                <TwitterIcon className="w-3.5 h-3.5" />
               </a>
+
               <a
                 href="https://instagram.com/ayushjha"
                 target="_blank"
-                rel="noreferrer"
-                className="w-9 h-9 rounded-full flex items-center justify-center border border-subtle text-secondary hover:text-crimson hover:border-crimson/40 hover:bg-surface-elevated transition-colors"
-                aria-label="Instagram"
+                rel="noopener noreferrer"
+                className="w-8 h-8 rounded-full flex items-center justify-center border border-subtle text-secondary hover:text-crimson hover:border-crimson/40 hover:bg-surface-elevated hover:scale-105 transition-all"
+                aria-label="Instagram profile"
               >
-                <InstagramIcon className="w-4 h-4" />
+                <InstagramIcon className="w-3.5 h-3.5" />
               </a>
+
               <a
                 href="mailto:ayushjha@gmail.com"
-                className="w-9 h-9 rounded-full flex items-center justify-center border border-subtle text-secondary hover:text-crimson hover:border-crimson/40 hover:bg-surface-elevated transition-colors"
-                aria-label="Email"
+                className="w-8 h-8 rounded-full flex items-center justify-center border border-subtle text-secondary hover:text-crimson hover:border-crimson/40 hover:bg-surface-elevated hover:scale-105 transition-all"
+                aria-label="Send email"
               >
-                <Mail className="w-4 h-4" />
+                <Mail className="w-3.5 h-3.5" />
               </a>
             </div>
           </div>

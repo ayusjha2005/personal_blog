@@ -58,13 +58,17 @@ export default function AboutHero({ profile = {} }) {
               </motion.div>
 
               {/* Badge 2: Bottom-Left GitHub */}
-              <motion.div
+              <motion.a
+                href="https://github.com/ayusjha2005"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Visit Ayush Jha on GitHub (opens in new tab)"
                 animate={{ y: [0, 8, 0] }}
                 transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
-                className="absolute bottom-6 left-2 w-11 h-11 rounded-2xl bg-[#0F1218]/90 border border-white/20 backdrop-blur-md flex items-center justify-center text-white shadow-lg z-20"
+                className="absolute bottom-6 left-2 w-11 h-11 rounded-2xl bg-[#0F1218]/90 border border-white/20 backdrop-blur-md flex items-center justify-center text-white hover:text-crimson hover:border-crimson/50 hover:shadow-[0_0_15px_rgba(225,29,72,0.4)] shadow-lg z-20 transition-colors"
               >
                 <GithubIcon className="w-5 h-5" />
-              </motion.div>
+              </motion.a>
 
               {/* Badge 3: Mid-Right Sigma / Math */}
               <motion.div
