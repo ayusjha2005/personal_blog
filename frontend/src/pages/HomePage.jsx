@@ -3,10 +3,9 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { api } from '../services/api';
-import { pageVariants, staggerContainer, fadeInUp } from '../animations/variants';
+import { pageVariants, staggerContainer } from '../animations/variants';
 import HeroSection from '../components/home/HeroSection';
 import ArticleCard from '../components/blog/ArticleCard';
-import ContributionGraph from '../components/home/ContributionGraph';
 import StepNavigator from '../components/layout/StepNavigator';
 
 export default function HomePage() {
@@ -104,18 +103,6 @@ export default function HomePage() {
             </motion.div>
           )}
         </section>
-
-        {/* Developer Activity / GitHub Heatmap Section */}
-        <motion.div
-          id="stats"
-          variants={fadeInUp}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: '-50px' }}
-          className="scroll-mt-24"
-        >
-          <ContributionGraph />
-        </motion.div>
       </div>
     </motion.div>
   );

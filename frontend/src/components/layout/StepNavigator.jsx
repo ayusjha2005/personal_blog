@@ -11,8 +11,7 @@ export default function StepNavigator() {
     { id: '01', label: 'Home', path: '/', sectionId: 'hero' },
     { id: '02', label: 'Blogs', path: '/blog', sectionId: 'recent-blogs' },
     { id: '03', label: 'About', path: '/about', sectionId: 'about' },
-    { id: '04', label: 'Stats', path: '/#stats', sectionId: 'stats' },
-    { id: '05', label: 'Contact', path: '/contact', sectionId: 'contact' },
+    { id: '04', label: 'Contact', path: '/contact', sectionId: 'contact' },
   ];
 
   useEffect(() => {
@@ -26,7 +25,7 @@ export default function StepNavigator() {
       return;
     }
     if (location.pathname === '/contact') {
-      setActiveStep('05');
+      setActiveStep('04');
       return;
     }
 
@@ -38,12 +37,8 @@ export default function StepNavigator() {
 
       if (scrollY < height * 0.7) {
         setActiveStep('01');
-      } else if (scrollY < height * 1.8) {
-        setActiveStep('02');
-      } else if (scrollY < height * 2.8) {
-        setActiveStep('04');
       } else {
-        setActiveStep('05');
+        setActiveStep('02');
       }
     };
 

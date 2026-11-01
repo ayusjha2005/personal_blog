@@ -53,7 +53,6 @@ export const api = {
   likeArticle: (slug) => apiRequest(`/articles/${slug}/like`, { method: 'POST' }),
   commentArticle: (slug, data) => apiRequest(`/articles/${slug}/comment`, { method: 'POST', body: data }),
   sendContact: (data) => apiRequest('/contact', { method: 'POST', body: data }),
-  getActivity: () => apiRequest('/activity'),
   getLeaderboard: () => apiRequest('/leaderboard'),
 
   // Auth
