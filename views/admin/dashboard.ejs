@@ -88,6 +88,14 @@
             </div>
           </div>
         </div>
+
+        <div class="stat-card" onclick="window.location='/admin/comments'" style="cursor: pointer;">
+          <div class="stat-icon" style="background: #fce7f3; color: #db2777;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+          <div>
+            <div class="stat-title">Total Comments</div>
+            <div class="stat-val" style="color: #db2777;"><%= stats.totalComments || 0 %></div>
+          </div>
+        </div>
       </div>
 
       <!-- Recent Articles Section -->

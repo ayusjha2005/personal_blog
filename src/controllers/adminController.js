@@ -652,6 +652,84 @@ async function postDeleteMessage(req, res, next) {
   }
 }
 
+// Comments Management
+async function getComments(req, res, next) {
+  try {
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = 20;
+    const skip = (page - 1) * limit;
+    const search = req.query.q || null;
+
+    // Aggregate all embedded comments across articles
+    const pipeline = [
+      { $unwind: '$comments' },
+      { $match: search
+          ? { $or: [
+              { 'comments.name': new RegExp(search.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&'), 'i') },
+              { 'comments.body': new RegExp(search.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&'), 'i') },
+            ] }
+          : {} },
+      { $sort: { 'comments.createdAt': -1 } },
+      { $project: {
+          _id: 0,
+          articleId: '$_id',
+          articleTitle: '$title',
+          articleSlug: '$slug',
+          comment: '$comments',
+        } },
+    ];
+
+    const [countResult, comments, unreadCount] = await Promise.all([
+      Article.aggregate([...pipeline, { $count: 'total' }]),
+      Article.aggregate([...pipeline, { $skip: skip }, { $limit: limit }]),
+      contactService.getUnreadCount(),
+    ]);
+
+    const totalComments = countResult[0] ? countResult[0].total : 0;
+    const totalPages = Math.ceil(totalComments / limit) || 1;
+
+    res.render('admin/comments', {
+      title: 'Manage Comments | Admin',
+      activeAdmin: 'comments',
+      comments,
+      totalComments,
+      totalPages,
+      currentPage: page,
+      searchQuery: search,
+      unreadCount,
+      layout: false,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function postDeleteComment(req, res, next) {
+  try {
+    const { articleId, commentId } = req.params;
+
+    if (!articleId || !commentId) {
+      return res.status(400).redirect('/admin/comments');
+    }
+
+    const result = await Article.updateOne(
+      { _id: articleId },
+      { $pull: { comments: { _id: commentId } } }
+    );
+
+    if (result.matchedCount === 0) {
+      // Article not found — redirect gracefully
+      return res.redirect('/admin/comments');
+    }
+
+    // Preserve search/page context on redirect
+    const redirectUrl = req.body.returnTo || '/admin/comments';
+    res.redirect(redirectUrl);
+  } catch (error) {
+    next(error);
+  }
+}
+
 // Toggle article draft / published status
 async function postToggleStatus(req, res, next) {
   try {
@@ -764,4 +842,6 @@ module.exports = {
   getMessages,
   postMarkMessage,
   postDeleteMessage,
+  getComments,
+  postDeleteComment,
 };

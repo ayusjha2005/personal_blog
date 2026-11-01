@@ -38,5 +38,9 @@ router.get('/messages', adminController.getMessages);
 router.post('/messages/:id/mark', adminController.postMarkMessage);
 router.post('/messages/:id/delete', adminController.postDeleteMessage);
 
+// Comments management
+router.get('/comments', adminController.getComments);
+router.post('/comments/:articleId/:commentId/delete', adminController.postDeleteComment);
+
 module.exports = router;
 

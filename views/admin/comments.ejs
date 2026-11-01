@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+
+  <script>
+    (function() {
+      try {
+        var saved = localStorage.getItem('theme');
+        var theme = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {}
+    })();
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="/css/themes.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/admin.css?v=3">
+
+  <style>
+    html, body.admin-layout { height: 100%; min-height: 100vh; margin: 0; padding: 0; }
+
+    .comment-body-cell {
+      max-width: 380px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+
+    .comment-author {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .comment-email {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .search-bar-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .search-input-wrap {
+      position: relative;
+      flex: 1;
+      min-width: 220px;
+    }
+
+    .search-input-wrap svg {
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .search-input-wrap input[type="search"] {
+      width: 100%;
+      padding: 0.5rem 0.75rem 0.5rem 2.25rem;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      background: var(--bg-surface);
+      color: var(--text-primary);
+      font-size: 0.875rem;
+      outline: none;
+      box-sizing: border-box;
+    }
+
+    .search-input-wrap input[type="search"]:focus {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px var(--accent-glow, rgba(99,102,241,0.15));
+    }
+  </style>
+</head>
+<body class="admin-layout">
+  <%- include('sidebar') %>
+
+  <div class="admin-main">
+    <header class="admin-topbar">
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <button type="button" class="admin-menu-btn icon-btn" aria-label="Open navigation menu" aria-expanded="false">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+        <h1 style="font-size: 1.25rem; font-weight: 700; margin: 0;">Blog Comments</h1>
+      </div>
+      <div>
+        <span style="font-size: 0.85rem; color: var(--text-muted);">
+          <%= totalComments %> total comment<%= totalComments !== 1 ? 's' : '' %>
+        </span>
+      </div>
+    </header>
+
+    <main class="admin-content">
+
+      <!-- Search Bar -->
+      <form method="GET" action="/admin/comments" class="search-bar-row" role="search">
+        <div class="search-input-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input
+            type="search"
+            id="comment-search"
+            name="q"
+            value="<%= searchQuery || '' %>"
+            placeholder="Search by author or comment text&hellip;"
+            aria-label="Search comments"
+          >
+        </div>
+        <button type="submit" class="btn-pill-primary" style="white-space: nowrap;">Search</button>
+        <% if (searchQuery) { %>
+          <a href="/admin/comments" class="btn-pill-outline" style="white-space: nowrap;">Clear</a>
+        <% } %>
+      </form>
+
+      <!-- Comments Table -->
+      <div class="data-card">
+        <div style="overflow-x: auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Author</th>
+                <th>Comment</th>
+                <th>Article</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (comments && comments.length > 0) { %>
+                <% comments.forEach(function(item) { %>
+                  <%
+                    var safeAuthor = item.comment.name.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+                    var safeEmail  = (item.comment.email || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+                    var safeTitle  = item.articleTitle.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+                    var safeBody   = item.comment.body.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\r?\n/g, '\\n');
+                  %>
+                  <tr>
+                    <td>
+                      <div class="comment-author"><%= item.comment.name %></div>
+                      <% if (item.comment.email) { %>
+                        <a href="mailto:<%= item.comment.email %>" class="comment-email"><%= item.comment.email %></a>
+                      <% } %>
+                    </td>
+                    <td>
+                      <div class="comment-body-cell" title="<%= item.comment.body %>">
+                        <%= item.comment.body %>
+                      </div>
+                    </td>
+                    <td style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                      <a
+                        href="/blog/<%= item.articleSlug %>#comments"
+                        target="_blank"
+                        style="font-size: 0.85rem; color: var(--accent-primary); text-decoration: none; font-weight: 500;"
+                        title="<%= item.articleTitle %>"
+                      >
+                        <%= item.articleTitle %>
+                      </a>
+                    </td>
+                    <td style="font-size: 0.82rem; color: var(--text-muted); white-space: nowrap;">
+                      <%= formatDate(item.comment.createdAt) %>
+                    </td>
+                    <td>
+                      <div class="table-actions">
+                        <!-- View full comment modal -->
+                        <button
+                          type="button"
+                          class="icon-btn"
+                          title="View Full Comment"
+                          onclick="viewComment('<%-safeAuthor%>','<%-safeEmail%>','<%-safeTitle%>','<%-safeBody%>','<%= formatDate(item.comment.createdAt) %>')"
+                          aria-label="View comment"
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                          </svg>
+                        </button>
+
+                        <!-- Delete comment -->
+                        <form
+                          action="/admin/comments/<%= item.articleId %>/<%= item.comment._id %>/delete"
+                          method="POST"
+                          style="display: inline;"
+                          onsubmit="return confirm('Permanently delete this comment by <%- safeAuthor %>?')"
+                        >
+                          <input type="hidden" name="returnTo" value="/admin/comments<%= searchQuery ? '?q=' + encodeURIComponent(searchQuery) : '' %><%= currentPage > 1 ? (searchQuery ? '&' : '?') + 'page=' + currentPage : '' %>">
+                          <button
+                            type="submit"
+                            class="icon-btn"
+                            title="Delete Comment"
+                            style="color: var(--accent-highlight);"
+                            aria-label="Delete comment"
+                          >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                              <polyline points="3 6 5 6 21 6"></polyline>
+                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                          </button>
+                        </form>
+                      </div>
+                    </td>
+                  </tr>
+                <% }); %>
+              <% } else { %>
+                <tr>
+                  <td colspan="5" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                    <% if (searchQuery) { %>
+                      No comments match &ldquo;<%= searchQuery %>&rdquo;.
+                      <a href="/admin/comments" style="color: var(--accent-primary);">Clear search</a>
+                    <% } else { %>
+                      No comments yet. Reader comments will appear here.
+                    <% } %>
+                  </td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <% if (totalPages > 1) { %>
+        <div style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 1.5rem; flex-wrap: wrap;">
+          <% for (let i = 1; i <= totalPages; i++) { %>
+            <a
+              href="/admin/comments?page=<%= i %><%= searchQuery ? '&q=' + encodeURIComponent(searchQuery) : '' %>"
+              class="page-btn <%= i === currentPage ? 'active' : '' %>"
+              aria-label="Page <%= i %>"
+              <%= i === currentPage ? 'aria-current="page"' : '' %>
+            >
+              <%= i %>
+            </a>
+          <% } %>
+        </div>
+      <% } %>
+
+    </main>
+  </div>
+
+  <!-- Comment Detail Modal -->
+  <dialog
+    id="comment-modal"
+    style="margin: auto; border: 1px solid var(--border-light); border-radius: var(--radius-lg); background-color: var(--bg-surface); color: var(--text-primary); max-width: 560px; width: min(92vw, 560px); padding: 1.5rem; box-shadow: var(--shadow-lg);"
+  >
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+      <h3 id="modal-article" style="font-size: 1.05rem; font-weight: 700; margin: 0; color: var(--text-secondary);"></h3>
+      <button
+        onclick="document.getElementById('comment-modal').close()"
+        class="icon-btn"
+        aria-label="Close modal"
+      >&times;</button>
+    </div>
+    <div style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+      <span id="modal-author" style="font-weight: 600; color: var(--text-primary);"></span>
+      <span id="modal-email-wrap">
+        &nbsp;(<a id="modal-email" href="#" style="color: var(--text-muted);"></a>)
+      </span>
+      &bull; <span id="modal-date"></span>
+    </div>
+    <div
+      id="modal-body"
+      style="font-size: 0.95rem; line-height: 1.7; padding: 1rem; background-color: var(--bg-surface-elevated); border-radius: var(--radius-md); margin-bottom: 1.5rem; white-space: pre-wrap; word-break: break-word;"
+    ></div>
+    <div style="display: flex; justify-content: flex-end;">
+      <button onclick="document.getElementById('comment-modal').close()" class="btn-pill-primary">Close</button>
+    </div>
+  </dialog>
+
+  <script src="/js/theme.js"></script>
+  <script>
+    function viewComment(author, email, articleTitle, body, date) {
+      document.getElementById('modal-article').textContent = articleTitle;
+      document.getElementById('modal-author').textContent = author;
+
+      var emailEl   = document.getElementById('modal-email');
+      var emailWrap = document.getElementById('modal-email-wrap');
+      if (email) {
+        emailEl.textContent = email;
+        emailEl.href = 'mailto:' + email;
+        emailWrap.style.display = 'inline';
+      } else {
+        emailWrap.style.display = 'none';
+      }
+
+      document.getElementById('modal-date').textContent = date;
+      // Unescape \n back to real newlines
+      document.getElementById('modal-body').textContent = body.replace(/\\n/g, '\n');
+      document.getElementById('comment-modal').showModal();
+    }
+  </script>
+</body>
+</html>
