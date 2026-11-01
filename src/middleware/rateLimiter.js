@@ -1,12 +1,15 @@
 const rateLimit = require('express-rate-limit');
 
-// Rate limiter for contact form submissions (5 requests per 15 minutes per IP)
+// Rate limiter for contact form submissions (10 requests per 15 minutes per IP)
 const contactLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,
   standardHeaders: true,
   legacyHeaders: false,
   handler: (req, res) => {
+    if (req.originalUrl.startsWith('/api') || req.headers.accept?.includes('application/json')) {
+      return res.status(429).json({ error: 'Too many contact messages sent from this IP. Please wait a few minutes before trying again.' });
+    }
     res.status(429).render('pages/contact', {
       title: "Let's Connect | Ayush Jha",
       activePage: 'contact',
@@ -17,13 +20,16 @@ const contactLimiter = rateLimit({
   },
 });
 
-// Rate limiter for admin login attempts (5 requests per 15 minutes per IP)
+// Rate limiter for admin login attempts (8 requests per 15 minutes per IP)
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 8,
   standardHeaders: true,
   legacyHeaders: false,
   handler: (req, res) => {
+    if (req.originalUrl.startsWith('/api') || req.headers.accept?.includes('application/json')) {
+      return res.status(429).json({ error: 'Too many login attempts. Please wait 15 minutes before trying again.' });
+    }
     res.status(429).render('admin/login', {
       title: 'Admin Login | Ayush Jha',
       error: 'Too many login attempts. Please wait 15 minutes before trying again.',
@@ -40,7 +46,9 @@ const commentLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   handler: (req, res) => {
-    const slug = req.params.slug || '';
+    if (req.originalUrl.startsWith('/api') || req.headers.accept?.includes('application/json')) {
+      return res.status(429).json({ error: 'Too many comments submitted from this IP. Please wait a few minutes before trying again.' });
+    }
     res.status(429).send('Too many comments submitted from this IP. Please wait a few minutes before trying again.');
   },
 });

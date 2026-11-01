@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ayush Jha | Ideas. Code. Progress.</title>
+    <meta name="description" content="Personal developer journal of Ayush Jha — computer science student writing about web engineering, backend systems, databases, Linux, and developer tools." />
+    <meta name="keywords" content="Ayush Jha, Software Developer, Full-Stack Developer, CSE Student, Web Development, Backend, JavaScript, React, Node.js, MongoDB" />
+    <meta name="author" content="Ayush Jha" />
+    <meta name="theme-color" content="#0a0a0c" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href="https://ayushjha.dev" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://ayushjha.dev" />
+    <meta property="og:site_name" content="Ayush Jha" />
+    <meta property="og:title" content="Ayush Jha | Ideas. Code. Progress." />
+    <meta property="og:description" content="Personal developer journal of Ayush Jha covering web development, backend engineering, databases, and practical software projects." />
+    <meta property="og:image" content="https://ayushjha.dev/images/profile.jpg" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@ayushjha" />
+    <meta name="twitter:creator" content="@ayushjha" />
+    <meta name="twitter:title" content="Ayush Jha | Ideas. Code. Progress." />
+    <meta name="twitter:description" content="Personal developer journal of Ayush Jha covering web development, backend engineering, databases, and practical software projects." />
+    <meta name="twitter:image" content="https://ayushjha.dev/images/profile.jpg" />
+
+    <!-- Zero-FOUC Theme Detection -->
+    <script>
+      (function() {
+        try {
+          const savedTheme = localStorage.getItem('theme');
+          if (savedTheme) {
+            document.documentElement.setAttribute('data-theme', savedTheme);
+          } else {
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+          }
+        } catch (e) {}
+      })();
+    </script>
+
+    <!-- Google Fonts: Plus Jakarta Sans, Inter, JetBrains Mono, Caveat -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  </head>
+  <body class="bg-primary text-primary antialiased selection:bg-crimson-600 selection:text-white min-h-screen">
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

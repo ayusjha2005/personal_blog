@@ -1,4 +1,8 @@
 function notFoundHandler(req, res, next) {
+  if (req.originalUrl.startsWith('/api') || req.headers.accept?.includes('application/json')) {
+    return res.status(404).json({ error: 'Endpoint not found', path: req.originalUrl });
+  }
+
   res.status(404).render('pages/404', {
     title: 'Page Not Found | Ayush Jha',
     activePage: '404',
@@ -7,7 +11,18 @@ function notFoundHandler(req, res, next) {
 }
 
 function globalErrorHandler(err, req, res, next) {
-  console.error('[Global Error]:', err);
+  console.error('[Global Error]:', err.message || err);
+
+  const statusCode = err.status || 500;
+
+  if (req.originalUrl.startsWith('/api') || req.headers.accept?.includes('application/json')) {
+    return res.status(statusCode).json({
+      error:
+        process.env.NODE_ENV === 'production' && statusCode === 500
+          ? 'An internal error occurred. Please try again later.'
+          : (err.message || 'An unexpected error occurred'),
+    });
+  }
 
   // CSRF token error
   if (err.code === 'EBADCSRFTOKEN') {
@@ -19,7 +34,6 @@ function globalErrorHandler(err, req, res, next) {
     });
   }
 
-  const statusCode = err.status || 500;
   res.status(statusCode).render('pages/500', {
     title: 'Server Error | Ayush Jha',
     activePage: '500',

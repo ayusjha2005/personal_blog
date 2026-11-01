@@ -134,7 +134,33 @@ app.use(async (req, res, next) => {
   }
 });
 
-// Mount Routes
+// Mount API Routes
+const apiRoutes = require('./routes/apiRoutes');
+const fs = require('fs');
+app.use('/api', apiRoutes);
+
+// If React frontend build exists, serve it
+const frontendDist = path.join(__dirname, '../frontend/dist');
+if (fs.existsSync(frontendDist)) {
+  app.use(express.static(frontendDist));
+  app.get('*', (req, res, next) => {
+    if (
+      req.path.startsWith('/api') ||
+      req.path.startsWith('/images') ||
+      req.path.startsWith('/uploads') ||
+      req.path.startsWith('/css') ||
+      req.path.startsWith('/js') ||
+      req.path === '/health' ||
+      req.path === '/sitemap.xml' ||
+      req.path === '/robots.txt'
+    ) {
+      return next();
+    }
+    res.sendFile(path.join(frontendDist, 'index.html'));
+  });
+}
+
+// Fallback to existing server routes
 app.use('/', publicRoutes);
 app.use('/blog', blogRoutes);
 app.use('/contact', contactRoutes);
