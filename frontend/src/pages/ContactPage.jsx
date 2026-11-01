@@ -99,8 +99,8 @@ export default function ContactPage() {
               </div>
               <div>
                 <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Email</div>
-                <a href={`mailto:${profile.contactEmail || 'ayushjha@gmail.com'}`} className="hover:text-crimson transition-colors">
-                  {profile.contactEmail || 'ayushjha@gmail.com'}
+                <a href={`mailto:${profile.contactEmail || 'reach2kr.ayush@gmail.com'}`} className="hover:text-crimson transition-colors">
+                  {profile.contactEmail || 'reach2kr.ayush@gmail.com'}
                 </a>
               </div>
             </div>
