@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Article = require('../models/Article');
 const { SLUG_TO_NAME } = require('../config/categories');
 
@@ -160,10 +161,14 @@ class ArticleService {
   }
 
   async getStats() {
-    const [totalPublished, totalDrafts, totalViews] = await Promise.all([
+    const [totalPublished, totalDrafts, totalViews, commentsResult] = await Promise.all([
       Article.countDocuments({ status: 'published' }),
       Article.countDocuments({ status: 'draft' }),
       Article.aggregate([{ $group: { _id: null, total: { $sum: '$views' } } }]),
+      Article.aggregate([
+        { $project: { count: { $size: { $ifNull: ['$comments', []] } } } },
+        { $group: { _id: null, total: { $sum: '$count' } } },
+      ]),
     ]);
 
     return {
@@ -171,6 +176,101 @@ class ArticleService {
       totalDrafts,
       totalArticles: totalPublished + totalDrafts,
       totalViews: totalViews[0]?.total || 0,
+      totalComments: commentsResult[0]?.total || 0,
+    };
+  }
+
+  async getTotalCommentsCount() {
+    const result = await Article.aggregate([
+      { $project: { count: { $size: { $ifNull: ['$comments', []] } } } },
+      { $group: { _id: null, total: { $sum: '$count' } } },
+    ]);
+    return result[0]?.total || 0;
+  }
+
+  async getAllComments({ page = 1, limit = 15, search = null, articleId = null }) {
+    const matchStage = {};
+    if (articleId && mongoose.Types.ObjectId.isValid(articleId)) {
+      matchStage._id = new mongoose.Types.ObjectId(articleId);
+    }
+
+    const pipeline = [];
+    if (Object.keys(matchStage).length > 0) {
+      pipeline.push({ $match: matchStage });
+    }
+
+    pipeline.push({ $unwind: '$comments' });
+
+    if (search && typeof search === 'string' && search.trim().length > 0) {
+      const cleanSearch = search.trim();
+      const searchRegex = new RegExp(cleanSearch.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&'), 'i');
+      pipeline.push({
+        $match: {
+          $or: [
+            { 'comments.name': searchRegex },
+            { 'comments.email': searchRegex },
+            { 'comments.body': searchRegex },
+            { title: searchRegex },
+          ],
+        },
+      });
+    }
+
+    const countPipeline = [...pipeline, { $count: 'total' }];
+    const countResult = await Article.aggregate(countPipeline);
+    const totalComments = countResult[0]?.total || 0;
+    const totalPages = Math.ceil(totalComments / limit) || 1;
+    const skip = (Math.max(1, parseInt(page, 10)) - 1) * limit;
+
+    pipeline.push(
+      { $sort: { 'comments.createdAt': -1 } },
+      { $skip: skip },
+      { $limit: limit },
+      {
+        $project: {
+          _id: '$comments._id',
+          articleId: '$_id',
+          articleTitle: '$title',
+          articleSlug: '$slug',
+          name: '$comments.name',
+          email: '$comments.email',
+          body: '$comments.body',
+          approved: '$comments.approved',
+          createdAt: '$comments.createdAt',
+        },
+      }
+    );
+
+    const comments = await Article.aggregate(pipeline);
+
+    return {
+      comments,
+      totalComments,
+      totalPages,
+      currentPage: Math.max(1, parseInt(page, 10)),
+    };
+  }
+
+  async deleteComment(commentId) {
+    if (!commentId || !mongoose.Types.ObjectId.isValid(commentId)) {
+      return { success: false, reason: 'invalid_id' };
+    }
+
+    const objectId = new mongoose.Types.ObjectId(commentId);
+    const article = await Article.findOne({ 'comments._id': objectId });
+    if (!article) {
+      return { success: false, reason: 'not_found' };
+    }
+
+    article.comments.pull({ _id: objectId });
+    await article.save();
+
+    return {
+      success: true,
+      commentId: commentId.toString(),
+      articleId: article._id.toString(),
+      articleSlug: article.slug,
+      articleTitle: article.title,
     };
   }
 }
